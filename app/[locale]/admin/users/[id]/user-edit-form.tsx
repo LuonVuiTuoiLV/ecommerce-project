@@ -1,26 +1,27 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { updateUser } from '@/lib/actions/user.actions'
@@ -29,6 +30,7 @@ import { IUser } from '@/lib/db/models/user.model'
 import { UserUpdateSchema } from '@/lib/validator'
 
 const UserEditForm = ({ user }: { user: IUser }) => {
+  const t = useTranslations('AdminForm')
   const router = useRouter()
 
   const form = useForm<z.infer<typeof UserUpdateSchema>>({
@@ -76,9 +78,9 @@ const UserEditForm = ({ user }: { user: IUser }) => {
             name='name'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>{t('Name')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter user name' {...field} />
+                  <Input placeholder={t('Enter user name')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -89,9 +91,9 @@ const UserEditForm = ({ user }: { user: IUser }) => {
             name='email'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{t('Email')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter user email' {...field} />
+                  <Input placeholder={t('Enter user email')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -104,14 +106,14 @@ const UserEditForm = ({ user }: { user: IUser }) => {
             name='role'
             render={({ field }) => (
               <FormItem className='space-x-2 items-center'>
-                <FormLabel>Role</FormLabel>
+                <FormLabel>{t('Role')}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value.toString()}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder='Select a role' />
+                      <SelectValue placeholder={t('Select a role')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -130,14 +132,14 @@ const UserEditForm = ({ user }: { user: IUser }) => {
         </div>
         <div className='flex-between'>
           <Button type='submit' disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Submitting...' : `Update User `}
+            {form.formState.isSubmitting ? t('Submitting') : t('Update User')}
           </Button>
           <Button
             variant='outline'
             type='button'
             onClick={() => router.push(`/admin/users`)}
           >
-            Back
+            {t('Back')}
           </Button>
         </div>
       </form>

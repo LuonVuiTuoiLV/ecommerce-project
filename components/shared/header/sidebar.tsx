@@ -1,8 +1,5 @@
-import * as React from 'react'
-import Link from 'next/link'
-import { X, ChevronRight, UserCircle, MenuIcon } from 'lucide-react'
+import { auth } from '@/auth'
 import { Button } from '@/components/ui/button'
-import { SignOut } from '@/lib/actions/user.actions'
 import {
   Drawer,
   DrawerClose,
@@ -12,9 +9,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer'
-import { auth } from '@/auth'
-import { getLocale, getTranslations } from 'next-intl/server'
 import { getDirection } from '@/i18n-config'
+import { SignOut } from '@/lib/actions/user.actions'
+import { ChevronRight, MenuIcon, UserCircle, X } from 'lucide-react'
+import { getLocale, getTranslations } from 'next-intl/server'
+import Link from 'next/link'
 
 export default async function Sidebar({
   categories,
@@ -30,7 +29,6 @@ export default async function Sidebar({
     <Drawer direction={getDirection(locale) === 'rtl' ? 'right' : 'left'}>
       <DrawerTrigger className='header-button flex items-center !p-2  '>
         <MenuIcon className='h-5 w-5 mr-1' />
-        {t('Header.All')}
       </DrawerTrigger>
       <DrawerContent className='w-[350px] mt-0 top-0'>
         <div className='flex flex-col h-full'>

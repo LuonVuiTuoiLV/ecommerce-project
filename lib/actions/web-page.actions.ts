@@ -1,17 +1,24 @@
 'use server'
 
+import { auth } from '@/auth'
 import { revalidatePath } from 'next/cache'
 
 import { connectToDatabase } from '@/lib/db'
 import WebPage, { IWebPage } from '@/lib/db/models/web-page.model'
 import { formatError } from '@/lib/utils'
 
-import { WebPageInputSchema, WebPageUpdateSchema } from '../validator'
 import { z } from 'zod'
+import { WebPageInputSchema, WebPageUpdateSchema } from '../validator'
 
 // CREATE
 export async function createWebPage(data: z.infer<typeof WebPageInputSchema>) {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
     const webPage = WebPageInputSchema.parse(data)
     await connectToDatabase()
     await WebPage.create(webPage)
@@ -28,6 +35,12 @@ export async function createWebPage(data: z.infer<typeof WebPageInputSchema>) {
 // UPDATE
 export async function updateWebPage(data: z.infer<typeof WebPageUpdateSchema>) {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
     const webPage = WebPageUpdateSchema.parse(data)
     await connectToDatabase()
     await WebPage.findByIdAndUpdate(webPage._id, webPage)
@@ -43,6 +56,12 @@ export async function updateWebPage(data: z.infer<typeof WebPageUpdateSchema>) {
 // DELETE
 export async function deleteWebPage(id: string) {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
     await connectToDatabase()
     const res = await WebPage.findByIdAndDelete(id)
     if (!res) throw new Error('WebPage not found')

@@ -1,15 +1,16 @@
 'use client'
 
-import * as React from 'react'
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+    type CarouselApi,
 } from '@/components/ui/carousel'
-import ProductCard from './product-card'
 import { IProduct } from '@/lib/db/models/product.model'
+import * as React from 'react'
+import ProductCard from './product-card'
 
 export default function ProductSlider({
   title,
@@ -20,10 +21,37 @@ export default function ProductSlider({
   products: IProduct[]
   hideDetails?: boolean
 }) {
+  const [api, setApi] = React.useState<CarouselApi>()
+  const [canScrollPrev, setCanScrollPrev] = React.useState(false)
+  const [canScrollNext, setCanScrollNext] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!api) return
+
+    const updateScrollState = () => {
+      setCanScrollPrev(api.canScrollPrev())
+      setCanScrollNext(api.canScrollNext())
+    }
+
+    updateScrollState()
+    api.on('select', updateScrollState)
+    api.on('reInit', updateScrollState)
+
+    return () => {
+      api.off('select', updateScrollState)
+      api.off('reInit', updateScrollState)
+    }
+  }, [api])
+
+  // Calculate items per view based on hideDetails
+  const itemsPerView = hideDetails ? 6 : 5 // lg breakpoint
+  const showArrows = products.length > itemsPerView
+
   return (
     <div className='w-full bg-background'>
-      <h2 className='h2-bold mb-5'>{title}</h2>
+      {title && <h2 className='h2-bold mb-5'>{title}</h2>}
       <Carousel
+        setApi={setApi}
         opts={{
           align: 'start',
         }}
@@ -35,8 +63,8 @@ export default function ProductSlider({
               key={product.slug}
               className={
                 hideDetails
-                  ? 'md:basis-1/4 lg:basis-1/6'
-                  : 'md:basis-1/3 lg:basis-1/5'
+                  ? 'basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6'
+                  : 'basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/5'
               }
             >
               <ProductCard
@@ -48,8 +76,12 @@ export default function ProductSlider({
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className='left-0' />
-        <CarouselNext className='right-0' />
+        {showArrows && canScrollPrev && (
+          <CarouselPrevious className='left-0 hidden md:flex' />
+        )}
+        {showArrows && canScrollNext && (
+          <CarouselNext className='right-0 hidden md:flex' />
+        )}
       </Carousel>
     </div>
   )

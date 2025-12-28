@@ -1,10 +1,11 @@
 'use server'
+import { auth } from '@/auth'
 import { ISettingInput } from '@/types'
-import data from '../data'
-import Setting from '../db/models/setting.model'
-import { connectToDatabase } from '../db'
-import { formatError } from '../utils'
 import { cookies } from 'next/headers'
+import data from '../data'
+import { connectToDatabase } from '../db'
+import Setting from '../db/models/setting.model'
+import { formatError } from '../utils'
 
 const globalForSettings = global as unknown as {
   cachedSettings: ISettingInput | null
@@ -17,7 +18,6 @@ export const getNoCachedSetting = async (): Promise<ISettingInput> => {
 
 export const getSetting = async (): Promise<ISettingInput> => {
   if (!globalForSettings.cachedSettings) {
-    console.log('hit db')
     await connectToDatabase()
     const setting = await Setting.findOne().lean()
     globalForSettings.cachedSettings = setting
@@ -29,6 +29,12 @@ export const getSetting = async (): Promise<ISettingInput> => {
 
 export const updateSetting = async (newSetting: ISettingInput) => {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
     await connectToDatabase()
     const updatedSetting = await Setting.findOneAndUpdate({}, newSetting, {
       upsert: true,

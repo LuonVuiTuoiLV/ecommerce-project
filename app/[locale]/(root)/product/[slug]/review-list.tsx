@@ -1,57 +1,57 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Calendar, Check, StarIcon, User } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { useInView } from 'react-intersection-observer'
 import { z } from 'zod'
-import { useTranslations } from 'next-intl'
 
 import Rating from '@/components/shared/product/rating'
+import RatingSummary from '@/components/shared/product/rating-summary'
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog'
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import {
-  createUpdateReview,
-  getReviewByProductId,
-  getReviews,
+    createUpdateReview,
+    getReviewByProductId,
+    getReviews,
 } from '@/lib/actions/review.actions'
-import { ReviewInputSchema } from '@/lib/validator'
-import RatingSummary from '@/components/shared/product/rating-summary'
 import { IProduct } from '@/lib/db/models/product.model'
-import { Separator } from '@/components/ui/separator'
+import { ReviewInputSchema } from '@/lib/validator'
 import { IReviewDetails } from '@/types'
 
 const reviewFormDefaultValues = {
@@ -145,6 +145,11 @@ export default function ReviewList({
       form.setValue('title', review.title)
       form.setValue('comment', review.comment)
       form.setValue('rating', review.rating)
+    } else {
+      // Reset form for new review
+      form.setValue('title', '')
+      form.setValue('comment', '')
+      form.setValue('rating', 5)
     }
     setOpen(true)
   }
@@ -179,11 +184,11 @@ export default function ReviewList({
                   {t('Write a customer review')}
                 </Button>
 
-                <DialogContent className='sm:max-w-[425px]'>
+                <DialogContent className='sm:max-w-[500px] max-h-[90vh] overflow-y-auto'>
                   <Form {...form}>
                     <form method='post' onSubmit={form.handleSubmit(onSubmit)}>
                       <DialogHeader>
-                        <DialogTitle>
+                        <DialogTitle className='text-xl'>
                           {t('Write a customer review')}
                         </DialogTitle>
                         <DialogDescription>
@@ -191,16 +196,55 @@ export default function ReviewList({
                         </DialogDescription>
                       </DialogHeader>
                       <div className='grid gap-4 py-4'>
-                        <div className='flex flex-col gap-5  '>
+                        <div className='flex flex-col gap-4'>
+                          <FormField
+                            control={form.control}
+                            name='rating'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className='text-base font-semibold'>{t('Rating')}</FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value.toString()}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger className='h-11'>
+                                      <SelectValue
+                                        placeholder={t('Select a rating')}
+                                      />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {Array.from({ length: 5 }).map(
+                                      (_, index) => (
+                                        <SelectItem
+                                          key={index}
+                                          value={(index + 1).toString()}
+                                        >
+                                          <div className='flex items-center gap-2'>
+                                            {index + 1}{' '}
+                                            <StarIcon className='h-4 w-4 fill-yellow-400 text-yellow-400' />
+                                          </div>
+                                        </SelectItem>
+                                      )
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
                           <FormField
                             control={form.control}
                             name='title'
                             render={({ field }) => (
                               <FormItem className='w-full'>
-                                <FormLabel>{t('Title')}</FormLabel>
+                                <FormLabel className='text-base font-semibold'>{t('Title')}</FormLabel>
                                 <FormControl>
                                   <Input
                                     placeholder={t('Enter title')}
+                                    className='h-11'
                                     {...field}
                                   />
                                 </FormControl>
@@ -214,10 +258,11 @@ export default function ReviewList({
                             name='comment'
                             render={({ field }) => (
                               <FormItem className='w-full'>
-                                <FormLabel>{t('Comment')}</FormLabel>
+                                <FormLabel className='text-base font-semibold'>{t('Comment')}</FormLabel>
                                 <FormControl>
                                   <Textarea
                                     placeholder={t('Enter comment')}
+                                    className='min-h-[120px] resize-none'
                                     {...field}
                                   />
                                 </FormControl>
@@ -226,53 +271,21 @@ export default function ReviewList({
                             )}
                           />
                         </div>
-                        <div>
-                          <FormField
-                            control={form.control}
-                            name='rating'
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('Rating')}</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  value={field.value.toString()}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue
-                                        placeholder={t('Select a rating')}
-                                      />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {Array.from({ length: 5 }).map(
-                                      (_, index) => (
-                                        <SelectItem
-                                          key={index}
-                                          value={(index + 1).toString()}
-                                        >
-                                          <div className='flex items-center gap-1'>
-                                            {index + 1}{' '}
-                                            <StarIcon className='h-4 w-4' />
-                                          </div>
-                                        </SelectItem>
-                                      )
-                                    )}
-                                  </SelectContent>
-                                </Select>
-
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
                       </div>
 
-                      <DialogFooter>
+                      <DialogFooter className='gap-2 sm:gap-0'>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          onClick={() => setOpen(false)}
+                          disabled={form.formState.isSubmitting}
+                        >
+                          {t('Cancel')}
+                        </Button>
                         <Button
                           type='submit'
-                          size='lg'
                           disabled={form.formState.isSubmitting}
+                          className='min-w-[100px]'
                         >
                           {form.formState.isSubmitting
                             ? t('Submitting...')

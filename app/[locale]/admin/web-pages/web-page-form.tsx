@@ -1,30 +1,31 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 
 import { z } from 'zod'
 
-import MdEditor from 'react-markdown-editor-lite'
-import ReactMarkdown from 'react-markdown'
-import 'react-markdown-editor-lite/lib/index.css'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { createWebPage, updateWebPage } from '@/lib/actions/web-page.actions'
 import { IWebPage } from '@/lib/db/models/web-page.model'
-import { WebPageInputSchema, WebPageUpdateSchema } from '@/lib/validator'
-import { Checkbox } from '@/components/ui/checkbox'
 import { toSlug } from '@/lib/utils'
+import { WebPageInputSchema, WebPageUpdateSchema } from '@/lib/validator'
+import ReactMarkdown from 'react-markdown'
+import MdEditor from 'react-markdown-editor-lite'
+import 'react-markdown-editor-lite/lib/index.css'
 
 const webPageDefaultValues =
   process.env.NODE_ENV === 'development'
@@ -48,6 +49,7 @@ const WebPageForm = ({
   webPage?: IWebPage
   webPageId?: string
 }) => {
+  const t = useTranslations('AdminForm')
   const router = useRouter()
 
   const form = useForm<z.infer<typeof WebPageInputSchema>>({
@@ -105,9 +107,9 @@ const WebPageForm = ({
             name='title'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Title</FormLabel>
+                <FormLabel>{t('Title')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter title' {...field} />
+                  <Input placeholder={t('Enter title')} {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -120,12 +122,12 @@ const WebPageForm = ({
             name='slug'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Slug</FormLabel>
+                <FormLabel>{t('Slug')}</FormLabel>
 
                 <FormControl>
                   <div className='relative'>
                     <Input
-                      placeholder='Enter slug'
+                      placeholder={t('Enter slug')}
                       className='pl-8'
                       {...field}
                     />
@@ -136,7 +138,7 @@ const WebPageForm = ({
                       }}
                       className='absolute right-2 top-2.5'
                     >
-                      Generate
+                      {t('Generate')}
                     </button>
                   </div>
                 </FormControl>
@@ -152,7 +154,7 @@ const WebPageForm = ({
             name='content'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Content</FormLabel>
+                <FormLabel>{t('Content')}</FormLabel>
                 <FormControl>
                   <MdEditor
                     // value={markdown}
@@ -181,7 +183,7 @@ const WebPageForm = ({
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <FormLabel>Is Published?</FormLabel>
+                <FormLabel>{t('Is Published')}</FormLabel>
               </FormItem>
             )}
           />
@@ -193,7 +195,7 @@ const WebPageForm = ({
             disabled={form.formState.isSubmitting}
             className='button col-span-2 w-full'
           >
-            {form.formState.isSubmitting ? 'Submitting...' : `${type} Page `}
+            {form.formState.isSubmitting ? t('Submitting') : `${type === 'Create' ? t('Create Page') : t('Update Page')} `}
           </Button>
         </div>
       </form>

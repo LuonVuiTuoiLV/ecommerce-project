@@ -1,7 +1,7 @@
+﻿import { i18n } from '@/i18n-config'
 import { Data, IProductInput, IUserInput } from '@/types'
-import { toSlug } from './utils'
 import bcrypt from 'bcryptjs'
-import { i18n } from '@/i18n-config'
+import { toSlug } from './utils'
 
 const users: IUserInput[] = [
   {
@@ -463,7 +463,7 @@ const products: IProductInput[] = [
     countInStock: 54,
     numSales: 21,
     description:
-      'Silver Jeans Co. Jace Slim Fit Bootcut Jeans - Consider Jace a modern cowboy jean. It sits below the waist and features a slim fit through the hip and thigh. Finished with an 18” bootcut leg opening that complements the slimmer silhouette while still fitting over boots',
+      'Silver Jeans Co. Jace Slim Fit Bootcut Jeans - Consider Jace a modern cowboy jean. It sits below the waist and features a slim fit through the hip and thigh. Finished with an 18â€ bootcut leg opening that complements the slimmer silhouette while still fitting over boots',
     sizes: ['30Wx30L', '34Wx30L', '36Wx30L'],
     colors: ['Blue', 'Grey'],
 
@@ -871,7 +871,7 @@ const products: IProductInput[] = [
     countInStock: 43,
     numSales: 72,
     description:
-      'Step into easy-wearing comfort with Skechers Hands Free Slip-ins™: Summits - High Range. Along with our Exclusive Heel Pillow™ holds your foot securely in place, this vegan style features a unique pop-up Skechers Slip-ins™ molded heel panel, a mesh upper with fixed laces',
+      'Step into easy-wearing comfort with Skechers Hands Free Slip-insâ„¢: Summits - High Range. Along with our Exclusive Heel Pillowâ„¢ holds your foot securely in place, this vegan style features a unique pop-up Skechers Slip-insâ„¢ molded heel panel, a mesh upper with fixed laces',
     sizes: ['8', '9', '10'],
     colors: ['Navy', 'Black', 'Grey'],
 
@@ -1071,13 +1071,13 @@ const data: Data = {
 
 At [Your Store Name], we prioritize customer satisfaction and innovation. Our team works tirelessly to curate a diverse selection of items, from everyday essentials to exclusive deals, ensuring there's something for everyone. We also strive to make your shopping experience seamless with fast shipping, secure payments, and excellent customer support.
 
-As we continue to grow, our commitment to quality and service remains unwavering. Thank you for choosing [Your Store Name]—we look forward to being a part of your journey and delivering value every step of the way.`,
+As we continue to grow, our commitment to quality and service remains unwavering. Thank you for choosing [Your Store Name]â€”we look forward to being a part of your journey and delivering value every step of the way.`,
       isPublished: true,
     },
     {
       title: 'Contact Us',
       slug: 'contact-us',
-      content: `We’re here to help! If you have any questions, concerns, or feedback, please don’t hesitate to reach out to us. Our team is ready to assist you and ensure you have the best shopping experience.
+      content: `Weâ€™re here to help! If you have any questions, concerns, or feedback, please donâ€™t hesitate to reach out to us. Our team is ready to assist you and ensure you have the best shopping experience.
 
 **Customer Support**
 For inquiries about orders, products, or account-related issues, contact our customer support team:
@@ -1138,7 +1138,7 @@ If you have questions or concerns, please reach out to us through our multiple c
 - **Phone:** +1 (123) 456-7890
 - **Live Chat:** Available on our website for instant assistance
 
-We also provide helpful resources such as order tracking, product guides, and FAQs to assist you with common inquiries. Your satisfaction is our priority, and we’re here to resolve any issues quickly and efficiently. Thank you for choosing us!`,
+We also provide helpful resources such as order tracking, product guides, and FAQs to assist you with common inquiries. Your satisfaction is our priority, and weâ€™re here to resolve any issues quickly and efficiently. Thank you for choosing us!`,
       isPublished: true,
     },
     {
@@ -1187,19 +1187,19 @@ We also provide helpful resources such as order tracking, product guides, and FA
   headerMenus: [
     {
       name: "Today's Deal",
-      href: '/search?tag=todays-deal',
+      href: '/search?tag=Ưu đãi hôm nay',
     },
     {
       name: 'New Arrivals',
-      href: '/search?tag=new-arrival',
+      href: '/search?tag=Hàng mới',
     },
     {
       name: 'Featured Products',
-      href: '/search?tag=featured',
+      href: '/search?tag=Nổi bật',
     },
     {
       name: 'Best Sellers',
-      href: '/search?tag=best-seller',
+      href: '/search?tag=Bán chạy',
     },
     {
       name: 'Browsing History',
@@ -1244,91 +1244,98 @@ We also provide helpful resources such as order tracking, product guides, and FA
   settings: [
     {
       common: {
-        freeShippingMinPrice: 35,
+        freeShippingMinPrice: 500000,
         isMaintenanceMode: false,
         defaultTheme: 'Light',
         defaultColor: 'Gold',
         pageSize: 9,
       },
       site: {
-        name: 'NxtAmzn',
+        name: 'ShopVN',
         description:
-          'NxtAmzn is a sample Ecommerce website built with Next.js, Tailwind CSS, and MongoDB.',
-        keywords: 'Next Ecommerce, Next.js, Tailwind CSS, MongoDB',
-        url: 'https://next-mongo-ecommerce-final.vercel.app',
+          'ShopVN - Mua sắm trực tuyến giá tốt, giao hàng nhanh toàn quốc.',
+        keywords: 'mua sắm online, thời trang, điện tử, gia dụng, Việt Nam',
+        url: 'https://shopvn.vercel.app',
         logo: '/icons/logo.svg',
-        slogan: 'Spend less, enjoy more.',
-        author: 'Next Ecommerce',
-        copyright: '2000-2024, Next-Ecommerce.com, Inc. or its affiliates',
-        email: 'admin@example.com',
-        address: '123, Main Street, Anytown, CA, Zip 12345',
-        phone: '+1 (123) 456-7890',
+        slogan: 'Mua sắm thông minh, giá cả hợp lý.',
+        author: 'ShopVN',
+        copyright: '2024, ShopVN. Bảo lưu mọi quyền.',
+        email: 'support@shopvn.com',
+        address: '123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh',
+        phone: '1900 1234',
       },
       carousels: [
         {
-          title: 'Most Popular Shoes For Sale',
-          buttonCaption: 'Shop Now',
+          title: 'Giày thể thao hot nhất',
+          buttonCaption: 'Mua ngay',
           image: '/images/banner3.jpg',
-          url: '/search?category=Shoes',
+          url: '/search?category=Giày dép',
         },
         {
-          title: 'Best Sellers in T-Shirts',
-          buttonCaption: 'Shop Now',
+          title: 'Áo thun bán chạy',
+          buttonCaption: 'Mua ngay',
           image: '/images/banner1.jpg',
-          url: '/search?category=T-Shirts',
+          url: '/search?category=Áo thun',
         },
         {
-          title: 'Best Deals on Wrist Watches',
-          buttonCaption: 'See More',
+          title: 'Đồng hồ giảm giá sốc',
+          buttonCaption: 'Xem thêm',
           image: '/images/banner2.jpg',
-          url: '/search?category=Wrist Watches',
+          url: '/search?category=Đồng hồ đeo tay',
         },
       ],
       availableLanguages: i18n.locales.map((locale) => ({
         code: locale.code,
         name: locale.name,
       })),
-      defaultLanguage: 'en-US',
+      defaultLanguage: 'vi',
       availableCurrencies: [
+        {
+          name: 'Viet Nam Dong',
+          code: 'VND',
+          symbol: 'VND',
+          convertRate: 24500,
+        },
         {
           name: 'United States Dollar',
           code: 'USD',
-          symbol: '$',
+          symbol: 'USD',
           convertRate: 1,
         },
-        { name: 'Euro', code: 'EUR', symbol: '€', convertRate: 0.96 },
-        { name: 'UAE Dirham', code: 'AED', symbol: 'AED', convertRate: 3.67 },
       ],
-      defaultCurrency: 'USD',
+      defaultCurrency: 'VND',
       availablePaymentMethods: [
-        { name: 'PayPal', commission: 0 },
-        { name: 'Stripe', commission: 0 },
         { name: 'Cash On Delivery', commission: 0 },
+        { name: 'Bank Transfer', commission: 0 },
+        { name: 'Stripe', commission: 0 },
+        { name: 'PayPal', commission: 0 },
       ],
-      defaultPaymentMethod: 'PayPal',
+      defaultPaymentMethod: 'Cash On Delivery',
       availableDeliveryDates: [
         {
-          name: 'Tomorrow',
+          name: 'Giao nhanh (1 ngày)',
           daysToDeliver: 1,
-          shippingPrice: 12.9,
+          shippingPrice: 2.04, // ~50,000 VND
           freeShippingMinPrice: 0,
         },
         {
-          name: 'Next 3 Days',
+          name: 'Giao tiêu chuẩn (3 ngày)',
           daysToDeliver: 3,
-          shippingPrice: 6.9,
+          shippingPrice: 1.22, // ~30,000 VND
           freeShippingMinPrice: 0,
         },
         {
-          name: 'Next 5 Days',
+          name: 'Giao tiết kiệm (5 ngày)',
           daysToDeliver: 5,
-          shippingPrice: 4.9,
-          freeShippingMinPrice: 35,
+          shippingPrice: 0.61, // ~15,000 VND
+          freeShippingMinPrice: 20.41, // ~500,000 VND
         },
       ],
-      defaultDeliveryDate: 'Next 5 Days',
+      defaultDeliveryDate: 'Giao tiết kiệm (5 ngày)',
     },
   ],
 }
 
 export default data
+
+

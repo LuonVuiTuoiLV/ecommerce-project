@@ -1,13 +1,17 @@
 import { notFound } from 'next/navigation'
-import React from 'react'
 
 import { auth } from '@/auth'
 import { getOrderById } from '@/lib/actions/order.actions'
-import PaymentForm from './payment-form'
+import { getSetting } from '@/lib/actions/setting.actions'
+import { getTranslations } from 'next-intl/server'
 import Stripe from 'stripe'
+import PaymentForm from './payment-form'
 
-export const metadata = {
-  title: 'Payment',
+export async function generateMetadata() {
+  const t = await getTranslations('Checkout')
+  return {
+    title: t('Payment Method'),
+  }
 }
 
 const CheckoutPaymentPage = async (props: {
@@ -23,6 +27,12 @@ const CheckoutPaymentPage = async (props: {
   if (!order) notFound()
 
   const session = await auth()
+  const { availablePaymentMethods } = await getSetting()
+
+  // Find the payment method details
+  const paymentMethodInfo = availablePaymentMethods.find(
+    (pm) => pm.name === order.paymentMethod
+  )
 
   let client_secret = null
   if (order.paymentMethod === 'Stripe' && !order.isPaid) {
@@ -40,6 +50,7 @@ const CheckoutPaymentPage = async (props: {
       paypalClientId={process.env.PAYPAL_CLIENT_ID || 'sb'}
       clientSecret={client_secret}
       isAdmin={session?.user?.role === 'Admin' || false}
+      paymentMethodInfo={paymentMethodInfo}
     />
   )
 }

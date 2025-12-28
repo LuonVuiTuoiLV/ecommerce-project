@@ -1,17 +1,19 @@
-import ReactMarkdown from 'react-markdown'
-import { notFound } from 'next/navigation'
 import { getWebPageBySlug } from '@/lib/actions/web-page.actions'
+import { getTranslations } from 'next-intl/server'
+import { notFound } from 'next/navigation'
+import ReactMarkdown from 'react-markdown'
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>
 }) {
   const params = await props.params
+  const t = await getTranslations('Error')
 
   const { slug } = params
 
   const webPage = await getWebPageBySlug(slug)
   if (!webPage) {
-    return { title: 'Web page not found' }
+    return { title: t('Not Found') }
   }
   return {
     title: webPage.title,

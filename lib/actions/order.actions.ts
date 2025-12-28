@@ -1,31 +1,92 @@
 'use server'
 
-import { Cart, IOrderList, OrderItem, ShippingAddress } from '@/types'
-import { formatError, round2 } from '../utils'
-import { connectToDatabase } from '../db'
 import { auth } from '@/auth'
-import { OrderInputSchema } from '../validator'
-import Order, { IOrder } from '../db/models/order.model'
-import { revalidatePath } from 'next/cache'
 import { sendAskReviewOrderItems, sendPurchaseReceipt } from '@/emails'
-import { paypal } from '../paypal'
+import { Cart, IOrderList, OrderItem, ShippingAddress } from '@/types'
+import mongoose from 'mongoose'
+import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { DateRange } from 'react-day-picker'
+import { connectToDatabase } from '../db'
+import Coupon from '../db/models/coupon.model'
+import Order, { IOrder } from '../db/models/order.model'
 import Product from '../db/models/product.model'
 import User from '../db/models/user.model'
-import mongoose from 'mongoose'
+import {
+    createReservation,
+    getEffectiveStock,
+    releaseUserReservations
+} from '../inventory-reservation'
+import { paypal } from '../paypal'
+import { checkRateLimit, getClientIdentifier, RateLimitPresets } from '../rate-limit'
+import { formatError, round2 } from '../utils'
+import { OrderInputSchema } from '../validator'
+import { incrementCouponUsage } from './coupon.actions'
 import { getSetting } from './setting.actions'
 
 // CREATE
-export const createOrder = async (clientSideCart: Cart) => {
+export const createOrder = async (clientSideCart: Cart & { coupon?: { code: string; discountAmount: number } }, couponCode?: string) => {
   try {
     await connectToDatabase()
     const session = await auth()
     if (!session) throw new Error('User not authenticated')
+    
+    // Rate limiting - prevent order spam
+    const headersList = await headers()
+    const clientId = getClientIdentifier(headersList)
+    const rateLimitResult = checkRateLimit(`order:${session.user.id || clientId}`, RateLimitPresets.order)
+    
+    if (!rateLimitResult.success) {
+      return {
+        success: false,
+        message: `Bạn đã tạo quá nhiều đơn hàng. Vui lòng thử lại sau ${rateLimitResult.resetIn} giây.`,
+      }
+    }
+
+    // Validate stock availability with reservation system
+    const stockValidation = await validateAndReserveStock(
+      clientSideCart.items,
+      session.user.id!
+    )
+    
+    if (!stockValidation.success) {
+      return {
+        success: false,
+        message: stockValidation.message,
+      }
+    }
+    
+    // Validate coupon on server-side if provided
+    let validatedDiscount = 0
+    let validatedCouponCode: string | undefined
+    
+    if (couponCode) {
+      const categories = [...new Set(clientSideCart.items.map(item => item.category))]
+      const itemsPrice = clientSideCart.items.reduce((acc, item) => acc + item.price * item.quantity, 0)
+      const couponResult = await validateCouponInternal(couponCode, itemsPrice, categories, session.user.id)
+      
+      if (couponResult.success && couponResult.data) {
+        validatedDiscount = couponResult.data.discountAmount
+        validatedCouponCode = couponResult.data.code
+      }
+    }
+    
     // recalculate price and delivery date on the server
     const createdOrder = await createOrderFromCart(
       clientSideCart,
-      session.user.id!
+      session.user.id!,
+      validatedCouponCode,
+      validatedDiscount
     )
+
+    // Release reservations after order is created (stock will be deducted on payment)
+    releaseUserReservations(session.user.id!)
+    
+    // Increment coupon usage if coupon was applied (with user tracking)
+    if (validatedCouponCode) {
+      await incrementCouponUsage(validatedCouponCode, session.user.id)
+    }
+    
     return {
       success: true,
       message: 'Order placed successfully',
@@ -35,29 +96,170 @@ export const createOrder = async (clientSideCart: Cart) => {
     return { success: false, message: formatError(error) }
   }
 }
+
+// Validate stock and create reservations
+async function validateAndReserveStock(
+  items: OrderItem[],
+  userId: string
+): Promise<{ success: boolean; message: string }> {
+  // Release any existing reservations for this user first
+  releaseUserReservations(userId)
+  
+  // Bulk fetch all products at once (avoid N+1 query)
+  const productIds = items.map(item => item.product)
+  const products = await Product.find({ _id: { $in: productIds } })
+    .select('_id name countInStock')
+    .lean()
+  
+  // Create a map for quick lookup
+  const productMap = new Map(products.map(p => [p._id.toString(), p]))
+  
+  const outOfStockItems: string[] = []
+  
+  for (const item of items) {
+    const product = productMap.get(item.product)
+    
+    if (!product) {
+      return {
+        success: false,
+        message: `Sản phẩm "${item.name}" không tồn tại`,
+      }
+    }
+    
+    // Check effective stock (actual - reserved by others)
+    const effectiveStock = getEffectiveStock(item.product, product.countInStock)
+    
+    if (effectiveStock < item.quantity) {
+      outOfStockItems.push(`${item.name} (còn ${effectiveStock})`)
+      continue
+    }
+    
+    // Create reservation
+    const reservationKey = createReservation(
+      item.product,
+      item.quantity,
+      userId,
+      product.countInStock
+    )
+    
+    if (!reservationKey) {
+      outOfStockItems.push(`${item.name} (hết hàng)`)
+    }
+  }
+  
+  if (outOfStockItems.length > 0) {
+    // Release any reservations we made
+    releaseUserReservations(userId)
+    return {
+      success: false,
+      message: `Không đủ số lượng: ${outOfStockItems.join(', ')}`,
+    }
+  }
+  
+  return { success: true, message: '' }
+}
+
+// Internal coupon validation (without auth check since we already have session)
+async function validateCouponInternal(code: string, orderTotal: number, categories: string[], userId?: string) {
+  const coupon = await Coupon.findOne({ code: code.toUpperCase().trim() })
+
+  if (!coupon) {
+    return { success: false, message: 'Invalid coupon code' }
+  }
+
+  // Check if coupon is active
+  if (!coupon.isActive) {
+    return { success: false, message: 'This coupon is no longer active' }
+  }
+
+  // Check date validity
+  const now = new Date()
+  if (now < coupon.startDate || now > coupon.endDate) {
+    return { success: false, message: 'This coupon has expired' }
+  }
+
+  // Check usage limit
+  if (coupon.usedCount >= coupon.usageLimit) {
+    return { success: false, message: 'This coupon has reached its usage limit' }
+  }
+
+  // Check per-user usage limit
+  if (userId && coupon.usedBy && coupon.usagePerUser) {
+    const userUsageCount = coupon.usedBy.filter(
+      (usage: { user: string }) => usage.user === userId
+    ).length
+    if (userUsageCount >= coupon.usagePerUser) {
+      return { success: false, message: 'You have already used this coupon the maximum number of times' }
+    }
+  }
+
+  // Check minimum order value
+  if (orderTotal < coupon.minOrderValue) {
+    return { success: false, message: `Minimum order value is ${coupon.minOrderValue}` }
+  }
+
+  // Check applicable categories
+  if (coupon.applicableCategories && coupon.applicableCategories.length > 0) {
+    const hasApplicableCategory = categories.some((cat) =>
+      coupon.applicableCategories!.includes(cat)
+    )
+    if (!hasApplicableCategory) {
+      return { success: false, message: 'This coupon is not applicable to items in your cart' }
+    }
+  }
+
+  // Calculate discount
+  let discountAmount = 0
+  if (coupon.discountType === 'percentage') {
+    discountAmount = (orderTotal * coupon.discountValue) / 100
+    if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+      discountAmount = coupon.maxDiscount
+    }
+  } else {
+    discountAmount = coupon.discountValue
+  }
+
+  // Ensure discount doesn't exceed order total
+  if (discountAmount > orderTotal) {
+    discountAmount = orderTotal
+  }
+
+  return {
+    success: true,
+    data: {
+      code: coupon.code,
+      discountAmount: round2(discountAmount),
+    },
+  }
+}
+
 export const createOrderFromCart = async (
   clientSideCart: Cart,
-  userId: string
+  userId: string,
+  couponCode?: string,
+  discountAmount: number = 0
 ) => {
-  const cart = {
-    ...clientSideCart,
-    ...calcDeliveryDateAndPrice({
-      items: clientSideCart.items,
-      shippingAddress: clientSideCart.shippingAddress,
-      deliveryDateIndex: clientSideCart.deliveryDateIndex,
-    }),
-  }
+  const priceData = await calcDeliveryDateAndPrice({
+    items: clientSideCart.items,
+    shippingAddress: clientSideCart.shippingAddress,
+    deliveryDateIndex: clientSideCart.deliveryDateIndex,
+  })
+
+  // Calculate final total with discount
+  const finalTotalPrice = round2(Math.max(0, priceData.totalPrice - discountAmount))
 
   const order = OrderInputSchema.parse({
     user: userId,
-    items: cart.items,
-    shippingAddress: cart.shippingAddress,
-    paymentMethod: cart.paymentMethod,
-    itemsPrice: cart.itemsPrice,
-    shippingPrice: cart.shippingPrice,
-    taxPrice: cart.taxPrice,
-    totalPrice: cart.totalPrice,
-    expectedDeliveryDate: cart.expectedDeliveryDate,
+    items: clientSideCart.items,
+    shippingAddress: clientSideCart.shippingAddress,
+    paymentMethod: clientSideCart.paymentMethod,
+    itemsPrice: priceData.itemsPrice,
+    shippingPrice: priceData.shippingPrice,
+    taxPrice: priceData.taxPrice,
+    totalPrice: finalTotalPrice,
+    couponCode,
+    discountAmount,
+    expectedDeliveryDate: clientSideCart.expectedDeliveryDate,
   })
   return await Order.create(order)
 }
@@ -73,8 +275,10 @@ export async function updateOrderToPaid(orderId: string) {
     order.isPaid = true
     order.paidAt = new Date()
     await order.save()
-    if (!process.env.MONGODB_URI?.startsWith('mongodb://localhost'))
-      await updateProductStock(order._id)
+    
+    // Always update stock (removed localhost check - transactions work with replica sets)
+    await updateProductStock(order._id)
+    
     if (order.user.email) await sendPurchaseReceipt({ order })
     revalidatePath(`/account/orders/${orderId}`)
     return { success: true, message: 'Order paid successfully' }
@@ -83,41 +287,64 @@ export async function updateOrderToPaid(orderId: string) {
   }
 }
 const updateProductStock = async (orderId: string) => {
-  const session = await mongoose.connection.startSession()
+  // Check if MongoDB supports transactions (requires replica set)
+  const isReplicaSet = mongoose.connection.readyState === 1 && 
+    mongoose.connection.db?.admin !== undefined
 
-  try {
-    session.startTransaction()
-    const opts = { session }
+  if (isReplicaSet) {
+    // Use transaction for atomic updates
+    const session = await mongoose.connection.startSession()
+    try {
+      session.startTransaction()
+      const opts = { session }
 
-    const order = await Order.findOneAndUpdate(
-      { _id: orderId },
-      { isPaid: true, paidAt: new Date() },
-      opts
-    )
+      const order = await Order.findById(orderId).session(session)
+      if (!order) throw new Error('Order not found')
+
+      for (const item of order.items) {
+        const product = await Product.findById(item.product).session(session)
+        if (!product) throw new Error('Product not found')
+
+        if (product.countInStock < item.quantity) {
+          throw new Error(`Not enough stock for ${product.name}`)
+        }
+
+        await Product.updateOne(
+          { _id: product._id },
+          { $inc: { countInStock: -item.quantity, numSales: item.quantity } },
+          opts
+        )
+      }
+      await session.commitTransaction()
+      session.endSession()
+      return true
+    } catch (error) {
+      await session.abortTransaction()
+      session.endSession()
+      throw error
+    }
+  } else {
+    // Fallback for non-replica set (development)
+    const order = await Order.findById(orderId)
     if (!order) throw new Error('Order not found')
 
     for (const item of order.items) {
-      const product = await Product.findById(item.product).session(session)
-      if (!product) throw new Error('Product not found')
-
-      product.countInStock -= item.quantity
       await Product.updateOne(
-        { _id: product._id },
-        { countInStock: product.countInStock },
-        opts
+        { _id: item.product, countInStock: { $gte: item.quantity } },
+        { $inc: { countInStock: -item.quantity, numSales: item.quantity } }
       )
     }
-    await session.commitTransaction()
-    session.endSession()
     return true
-  } catch (error) {
-    await session.abortTransaction()
-    session.endSession()
-    throw error
   }
 }
 export async function deliverOrder(orderId: string) {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
     await connectToDatabase()
     const order = await Order.findById(orderId).populate<{
       user: { email: string; name: string }
@@ -138,6 +365,12 @@ export async function deliverOrder(orderId: string) {
 // DELETE
 export async function deleteOrder(id: string) {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
     await connectToDatabase()
     const res = await Order.findByIdAndDelete(id)
     if (!res) throw new Error('Order not found')

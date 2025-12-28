@@ -14,12 +14,39 @@ import {
   Text,
 } from '@react-email/components'
 
-import { formatCurrency } from '@/lib/utils'
-import { IOrder } from '@/lib/db/models/order.model'
 import { getSetting } from '@/lib/actions/setting.actions'
+import { IOrder } from '@/lib/db/models/order.model'
+import { formatCurrency } from '@/lib/utils'
+
+// Email translations (emails don't support next-intl)
+const emailTranslations = {
+  vi: {
+    purchaseReceipt: 'Hóa đơn mua hàng',
+    viewOrderReceipt: 'Xem hóa đơn đơn hàng',
+    orderId: 'Mã đơn hàng',
+    purchasedOn: 'Ngày mua',
+    pricePaid: 'Số tiền',
+    items: 'Sản phẩm',
+    tax: 'Thuế',
+    shipping: 'Vận chuyển',
+    total: 'Tổng cộng',
+  },
+  'en-US': {
+    purchaseReceipt: 'Purchase Receipt',
+    viewOrderReceipt: 'View order receipt',
+    orderId: 'Order ID',
+    purchasedOn: 'Purchased On',
+    pricePaid: 'Price Paid',
+    items: 'Items',
+    tax: 'Tax',
+    shipping: 'Shipping',
+    total: 'Total',
+  },
+}
 
 type OrderInformationProps = {
   order: IOrder
+  locale?: 'vi' | 'en-US'
 }
 
 PurchaseReceiptEmail.PreviewProps = {
@@ -61,32 +88,36 @@ PurchaseReceiptEmail.PreviewProps = {
     expectedDeliveryDate: new Date(),
     isDelivered: true,
   } as IOrder,
+  locale: 'vi',
 } satisfies OrderInformationProps
-const dateFormatter = new Intl.DateTimeFormat('en', { dateStyle: 'medium' })
 
 export default async function PurchaseReceiptEmail({
   order,
+  locale = 'vi',
 }: OrderInformationProps) {
   const { site } = await getSetting()
+  const t = emailTranslations[locale] || emailTranslations['vi']
+  const dateFormatter = new Intl.DateTimeFormat(locale === 'vi' ? 'vi-VN' : 'en', { dateStyle: 'medium' })
+  
   return (
     <Html>
-      <Preview>View order receipt</Preview>
+      <Preview>{t.viewOrderReceipt}</Preview>
       <Tailwind>
         <Head />
         <Body className='font-sans bg-white'>
           <Container className='max-w-xl'>
-            <Heading>Purchase Receipt</Heading>
+            <Heading>{t.purchaseReceipt}</Heading>
             <Section>
               <Row>
                 <Column>
                   <Text className='mb-0 text-gray-500 whitespace-nowrap text-nowrap mr-4'>
-                    Order ID
+                    {t.orderId}
                   </Text>
                   <Text className='mt-0 mr-4'>{order._id.toString()}</Text>
                 </Column>
                 <Column>
                   <Text className='mb-0 text-gray-500 whitespace-nowrap text-nowrap mr-4'>
-                    Purchased On
+                    {t.purchasedOn}
                   </Text>
                   <Text className='mt-0 mr-4'>
                     {dateFormatter.format(order.createdAt)}
@@ -94,7 +125,7 @@ export default async function PurchaseReceiptEmail({
                 </Column>
                 <Column>
                   <Text className='mb-0 text-gray-500 whitespace-nowrap text-nowrap mr-4'>
-                    Price Paid
+                    {t.pricePaid}
                   </Text>
                   <Text className='mt-0 mr-4'>
                     {formatCurrency(order.totalPrice)}
@@ -132,10 +163,10 @@ export default async function PurchaseReceiptEmail({
                 </Row>
               ))}
               {[
-                { name: 'Items', price: order.itemsPrice },
-                { name: 'Tax', price: order.taxPrice },
-                { name: 'Shipping', price: order.shippingPrice },
-                { name: 'Total', price: order.totalPrice },
+                { name: t.items, price: order.itemsPrice },
+                { name: t.tax, price: order.taxPrice },
+                { name: t.shipping, price: order.shippingPrice },
+                { name: t.total, price: order.totalPrice },
               ].map(({ name, price }) => (
                 <Row key={name} className='py-1'>
                   <Column align='right'>{name}:</Column>

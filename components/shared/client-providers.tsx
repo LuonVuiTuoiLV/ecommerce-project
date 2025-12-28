@@ -1,11 +1,13 @@
 'use client'
-import React from 'react'
 import useCartSidebar from '@/hooks/use-cart-sidebar'
-import CartSidebar from './cart-sidebar'
-import { ThemeProvider } from './theme-provider'
+import { ClientSetting } from '@/types'
+import { SessionProvider } from 'next-auth/react'
+import React from 'react'
 import { Toaster } from '../ui/toaster'
 import AppInitializer from './app-initializer'
-import { ClientSetting } from '@/types'
+import CartSidebar from './cart-sidebar'
+import { ThemeProvider } from './theme-provider'
+import WishlistMigrator from './wishlist-migrator'
 
 export default function ClientProviders({
   setting,
@@ -17,21 +19,24 @@ export default function ClientProviders({
   const visible = useCartSidebar()
 
   return (
-    <AppInitializer setting={setting}>
-      <ThemeProvider
-        attribute='class'
-        defaultTheme={setting.common.defaultTheme.toLocaleLowerCase()}
-      >
-        {visible ? (
-          <div className='flex min-h-screen'>
-            <div className='flex-1 overflow-hidden'>{children}</div>
-            <CartSidebar />
-          </div>
-        ) : (
-          <div>{children}</div>
-        )}
-        <Toaster />
-      </ThemeProvider>
-    </AppInitializer>
+    <SessionProvider>
+      <AppInitializer setting={setting}>
+        <ThemeProvider
+          attribute='class'
+          defaultTheme={setting.common.defaultTheme.toLocaleLowerCase()}
+        >
+          <WishlistMigrator />
+          {visible ? (
+            <div className='flex min-h-screen'>
+              <div className='flex-1 overflow-hidden'>{children}</div>
+              <CartSidebar />
+            </div>
+          ) : (
+            <div>{children}</div>
+          )}
+          <Toaster />
+        </ThemeProvider>
+      </AppInitializer>
+    </SessionProvider>
   )
 }

@@ -33,6 +33,10 @@ const webPageSchema = new Schema<IWebPage>(
   }
 )
 
+// Database indexes for query optimization
+webPageSchema.index({ slug: 1 })
+webPageSchema.index({ isPublished: 1 })
+
 const WebPage =
   (models.WebPage as Model<IWebPage>) ||
   model<IWebPage>('WebPage', webPageSchema)

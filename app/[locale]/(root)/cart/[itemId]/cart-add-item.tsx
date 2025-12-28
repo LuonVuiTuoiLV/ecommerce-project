@@ -3,14 +3,14 @@ import BrowsingHistoryList from '@/components/shared/browsing-history-list'
 import ProductPrice from '@/components/shared/product/product-price'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import useCartStore from '@/hooks/use-cart-store'
+import useSettingStore from '@/hooks/use-setting-store'
 import { cn } from '@/lib/utils'
 import { CheckCircle2Icon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import useCartStore from '@/hooks/use-cart-store'
-import useSettingStore from '@/hooks/use-setting-store'
-import { useTranslations } from 'next-intl'
 
 export default function CartAddItem({ itemId }: { itemId: string }) {
   const {
@@ -79,24 +79,24 @@ export default function CartAddItem({ itemId }: { itemId: string }) {
                   <div className='flex items-center'>
                     <div>
                       <span className='text-green-700'>
-                        Your order qualifies for FREE Shipping.
+                        {t('Cart.Your order qualifies for FREE Shipping')}
                       </span>{' '}
-                      Choose this option at checkout.
+                      {t('Cart.Choose this option at checkout')}
                     </div>
                   </div>
                 )}
               </div>
               <div className='lg:border-l lg:border-muted lg:pl-3 flex flex-col items-center gap-3  '>
                 <div className='flex gap-3'>
-                  <span className='text-lg font-bold'>Cart Subtotal:</span>
+                  <span className='text-lg font-bold'>{t('Cart.Subtotal')}:</span>
                   <ProductPrice className='text-2xl' price={itemsPrice} />
                 </div>
                 <Link
                   href='/checkout'
                   className={cn(buttonVariants(), 'rounded-full w-full')}
                 >
-                  Proceed to checkout (
-                  {items.reduce((a, c) => a + c.quantity, 0)} items)
+                  {t('Cart.Proceed to Checkout')} (
+                  {items.reduce((a, c) => a + c.quantity, 0)} {t('Cart.items')})
                 </Link>
                 <Link
                   href='/cart'

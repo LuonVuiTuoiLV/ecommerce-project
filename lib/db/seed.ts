@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import data from '@/lib/data'
+import { IOrderInput, OrderItem, ShippingAddress } from '@/types'
+import { loadEnvConfig } from '@next/env'
+import { cwd } from 'process'
 import { connectToDatabase } from '.'
-import User from './models/user.model'
+import {
+    calculateFutureDate,
+    calculatePastDate,
+    generateId,
+    round2,
+} from '../utils'
+import Order from './models/order.model'
 import Product from './models/product.model'
 import Review from './models/review.model'
-import { cwd } from 'process'
-import { loadEnvConfig } from '@next/env'
-import Order from './models/order.model'
-import {
-  calculateFutureDate,
-  calculatePastDate,
-  generateId,
-  round2,
-} from '../utils'
-import WebPage from './models/web-page.model'
 import Setting from './models/setting.model'
-import { OrderItem, IOrderInput, ShippingAddress } from '@/types'
+import User from './models/user.model'
+import WebPage from './models/web-page.model'
 
 loadEnvConfig(cwd())
 
@@ -162,6 +162,7 @@ const generateOrder = async (
     deliveredAt: calculatePastDate(i),
     createdAt: calculatePastDate(i),
     expectedDeliveryDate: calculateFutureDate(i % 2),
+    discountAmount: 0,
     ...calcDeliveryDateAndPriceForSeed({
       items: items,
       shippingAddress: data.users[i % users.length].address,

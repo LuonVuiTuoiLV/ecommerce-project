@@ -2,16 +2,18 @@
 
 import mongoose from 'mongoose'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { z } from 'zod'
 
 import { auth } from '@/auth'
 
+import { IReviewDetails } from '@/types'
 import { connectToDatabase } from '../db'
 import Product from '../db/models/product.model'
 import Review, { IReview } from '../db/models/review.model'
+import { checkRateLimit, getClientIdentifier, RateLimitPresets } from '../rate-limit'
 import { formatError } from '../utils'
 import { ReviewInputSchema } from '../validator'
-import { IReviewDetails } from '@/types'
 import { getSetting } from './setting.actions'
 
 export async function createUpdateReview({
@@ -25,6 +27,18 @@ export async function createUpdateReview({
     const session = await auth()
     if (!session) {
       throw new Error('User is not authenticated')
+    }
+
+    // Rate limiting
+    const headersList = await headers()
+    const clientId = getClientIdentifier(headersList)
+    const rateLimitResult = checkRateLimit(`review:${session.user.id || clientId}`, RateLimitPresets.form)
+    
+    if (!rateLimitResult.success) {
+      return {
+        success: false,
+        message: `Bạn đã gửi quá nhiều đánh giá. Vui lòng thử lại sau ${rateLimitResult.resetIn} giây.`,
+      }
     }
 
     const review = ReviewInputSchema.parse({
@@ -135,14 +149,102 @@ export const getReviewByProductId = async ({
 }: {
   productId: string
 }) => {
-  await connectToDatabase()
-  const session = await auth()
-  if (!session) {
-    throw new Error('User is not authenticated')
+  try {
+    await connectToDatabase()
+    const session = await auth()
+    if (!session) {
+      return null // Return null instead of throwing for unauthenticated users
+    }
+    const review = await Review.findOne({
+      product: productId,
+      user: session?.user?.id,
+    })
+    return review ? (JSON.parse(JSON.stringify(review)) as IReview) : null
+  } catch {
+    return null
   }
-  const review = await Review.findOne({
-    product: productId,
-    user: session?.user?.id,
-  })
-  return review ? (JSON.parse(JSON.stringify(review)) as IReview) : null
+}
+
+// Admin: Get all reviews with filters
+export async function getAllReviews({
+  page = 1,
+  limit = 20,
+  rating,
+}: {
+  page?: number
+  limit?: number
+  rating?: string
+}) {
+  try {
+    await connectToDatabase()
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      throw new Error('Unauthorized')
+    }
+
+    const skipAmount = (page - 1) * limit
+    const filter: { rating?: number } = {}
+    
+    if (rating && rating !== 'all') {
+      filter.rating = parseInt(rating)
+    }
+
+    const reviews = await Review.find(filter)
+      .populate('user', 'name email')
+      .populate('product', 'name slug')
+      .sort({ createdAt: -1 })
+      .skip(skipAmount)
+      .limit(limit)
+      .lean()
+
+    const totalReviews = await Review.countDocuments(filter)
+
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(reviews)),
+      totalPages: Math.ceil(totalReviews / limit),
+      totalReviews,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: formatError(error),
+      data: [],
+      totalPages: 0,
+      totalReviews: 0,
+    }
+  }
+}
+
+// Admin: Delete review
+export async function deleteReview(reviewId: string) {
+  try {
+    await connectToDatabase()
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      throw new Error('Unauthorized')
+    }
+
+    const review = await Review.findById(reviewId)
+    if (!review) {
+      throw new Error('Review not found')
+    }
+
+    const productId = review.product
+    await Review.findByIdAndDelete(reviewId)
+    
+    // Update product review stats
+    await updateProductReview(productId)
+
+    revalidatePath('/admin/reviews')
+    return {
+      success: true,
+      message: 'Review deleted successfully',
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: formatError(error),
+    }
+  }
 }

@@ -1,23 +1,25 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
+import useSetting from '@/hooks/use-setting-store'
 import { useToast } from '@/hooks/use-toast'
+import { updateSetting } from '@/lib/actions/setting.actions'
 import { SettingInputSchema } from '@/lib/validator'
 import { ClientSetting, ISettingInput } from '@/types'
-import { updateSetting } from '@/lib/actions/setting.actions'
-import useSetting from '@/hooks/use-setting-store'
-import LanguageForm from './language-form'
-import CurrencyForm from './currency-form'
-import PaymentMethodForm from './payment-method-form'
-import DeliveryDateForm from './delivery-date-form'
-import SiteInfoForm from './site-info-form'
-import CommonForm from './common-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
+import { useForm } from 'react-hook-form'
 import CarouselForm from './carousel-form'
+import CommonForm from './common-form'
+import CurrencyForm from './currency-form'
+import DeliveryDateForm from './delivery-date-form'
+import LanguageForm from './language-form'
+import PaymentMethodForm from './payment-method-form'
+import SiteInfoForm from './site-info-form'
 
 const SettingForm = ({ setting }: { setting: ISettingInput }) => {
+  const t = useTranslations('AdminForm')
   const { setSetting } = useSetting()
 
   const form = useForm<ISettingInput>({
@@ -70,7 +72,7 @@ const SettingForm = ({ setting }: { setting: ISettingInput }) => {
             disabled={isSubmitting}
             className='w-full mb-24'
           >
-            {isSubmitting ? 'Submitting...' : `Save Setting`}
+            {isSubmitting ? t('Submitting') : t('Save Setting')}
           </Button>
         </div>
       </form>

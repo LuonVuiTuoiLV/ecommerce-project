@@ -1,13 +1,16 @@
+import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 
 import { getUserById } from '@/lib/actions/user.actions'
 
-import UserEditForm from './user-edit-form'
 import Link from 'next/link'
-import { Metadata } from 'next'
+import UserEditForm from './user-edit-form'
 
-export const metadata: Metadata = {
-  title: 'Edit User',
+export async function generateMetadata() {
+  const t = await getTranslations('AdminForm')
+  return {
+    title: t('Update User'),
+  }
 }
 
 export default async function UserEditPage(props: {
@@ -16,6 +19,7 @@ export default async function UserEditPage(props: {
   }>
 }) {
   const params = await props.params
+  const t = await getTranslations('Admin')
 
   const { id } = params
 
@@ -24,7 +28,7 @@ export default async function UserEditPage(props: {
   return (
     <main className='max-w-6xl mx-auto p-4'>
       <div className='flex mb-4'>
-        <Link href='/admin/users'>Users</Link>
+        <Link href='/admin/users'>{t('Users')}</Link>
         <span className='mx-1'>›</span>
         <Link href={`/admin/users/${user._id}`}>{user._id}</Link>
       </div>

@@ -1,14 +1,14 @@
 'use client'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import { getFilterUrl } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import React from 'react'
 
 export default function ProductSortSelector({
   sortOrders,
@@ -27,6 +27,7 @@ export default function ProductSortSelector({
   }
 }) {
   const router = useRouter()
+  const t = useTranslations('Product')
   return (
     <Select
       onValueChange={(v) => {
@@ -36,7 +37,7 @@ export default function ProductSortSelector({
     >
       <SelectTrigger>
         <SelectValue>
-          Sort By: {sortOrders.find((s) => s.value === sort)!.name}
+          {t('Sort by')}: {sortOrders.find((s) => s.value === sort)!.name}
         </SelectValue>
       </SelectTrigger>
 

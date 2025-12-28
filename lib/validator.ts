@@ -86,14 +86,38 @@ export const OrderItemSchema = z.object({
   size: z.string().optional(),
   color: z.string().optional(),
 })
+
+// Vietnam Address Schema (API v2 - 2 cấp: Tỉnh/Thành phố → Phường/Xã)
+// Sau sáp nhập tỉnh thành 07/2025 - KHÔNG CÓ Quận/Huyện
+
+const VietnamPhoneRegex = /^(0|\+84)(3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-9]|2[0-9]{1,2})\d{6,7}$/
+
+export const VietnamAddressSchema = z.object({
+  fullName: z.string().min(1, 'Full name is required').max(100, 'Name too long'),
+  phone: z.string()
+    .min(1, 'Phone number is required')
+    .transform(val => val.replace(/[\s\-\.]/g, ''))
+    .refine(
+      val => VietnamPhoneRegex.test(val),
+      'Invalid Vietnam phone number'
+    ),
+  provinceCode: z.number().optional(),
+  provinceName: z.string().min(1, 'Province is required'),
+  wardCode: z.number().optional(),
+  wardName: z.string().min(1, 'Ward is required'),
+  street: z.string().min(1, 'Street address is required').max(200, 'Address too long'),
+  country: z.string().default('Việt Nam'),
+})
+
+// Legacy ShippingAddressSchema (for backward compatibility with checkout/orders)
 export const ShippingAddressSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   street: z.string().min(1, 'Address is required'),
-  city: z.string().min(1, 'City is required'),
-  postalCode: z.string().min(1, 'Postal code is required'),
+  city: z.string().optional().default(''), // Optional for Vietnam addresses (wardName)
+  postalCode: z.string().optional().default(''),
   province: z.string().min(1, 'Province is required'),
   phone: z.string().min(1, 'Phone number is required'),
-  country: z.string().min(1, 'Country is required'),
+  country: z.string().default('Việt Nam'),
 })
 
 // Order
@@ -122,6 +146,9 @@ export const OrderInputSchema = z.object({
   shippingPrice: Price('Shipping price'),
   taxPrice: Price('Tax price'),
   totalPrice: Price('Total price'),
+  // Coupon fields
+  couponCode: z.string().optional(),
+  discountAmount: z.coerce.number().min(0).default(0),
   expectedDeliveryDate: z
     .date()
     .refine(
@@ -234,6 +261,12 @@ export const SiteCurrencySchema = z.object({
 export const PaymentMethodSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   commission: z.coerce.number().min(0, 'Commission must be at least 0'),
+  // Bank Transfer details (optional)
+  bankName: z.string().optional(),
+  bankAccountNumber: z.string().optional(),
+  bankAccountName: z.string().optional(),
+  // Additional info
+  description: z.string().optional(),
 })
 
 export const DeliveryDateSchema = z.object({
@@ -300,4 +333,73 @@ export const SettingInputSchema = z.object({
     .array(DeliveryDateSchema)
     .min(1, 'At least one delivery date is required'),
   defaultDeliveryDate: z.string().min(1, 'Delivery date is required'),
+})
+
+// Coupon
+export const CouponInputSchema = z.object({
+  code: z
+    .string()
+    .min(3, 'Code must be at least 3 characters')
+    .max(20, 'Code must be at most 20 characters')
+    .transform((val) => val.toUpperCase().trim()),
+  description: z.string().min(1, 'Description is required'),
+  discountType: z.enum(['percentage', 'fixed']),
+  discountValue: z.coerce
+    .number()
+    .min(0, 'Discount value must be at least 0'),
+  minOrderValue: z.coerce
+    .number()
+    .min(0, 'Minimum order value must be at least 0')
+    .default(0),
+  maxDiscount: z.coerce
+    .number()
+    .min(0, 'Maximum discount must be at least 0')
+    .optional(),
+  usageLimit: z.coerce
+    .number()
+    .int()
+    .min(1, 'Usage limit must be at least 1')
+    .default(100),
+  usedCount: z.coerce
+    .number()
+    .int()
+    .min(0, 'Used count must be at least 0')
+    .default(0),
+  usagePerUser: z.coerce
+    .number()
+    .int()
+    .min(1, 'Usage per user must be at least 1')
+    .default(1),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
+  isActive: z.boolean().default(true),
+  applicableCategories: z.array(z.string()).default([]),
+})
+
+export const CouponUpdateSchema = CouponInputSchema.extend({
+  _id: z.string(),
+})
+
+// Contact
+export const ContactInputSchema = z.object({
+  name: z
+    .string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name must be at most 100 characters'),
+  email: z.string().email('Invalid email address'),
+  phone: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^[+]?[\d\s\-()]{7,20}$/.test(val),
+      'Invalid phone number format'
+    ),
+  subject: z
+    .string()
+    .min(3, 'Subject must be at least 3 characters')
+    .max(200, 'Subject must be at most 200 characters'),
+  message: z
+    .string()
+    .min(10, 'Message must be at least 10 characters')
+    .max(5000, 'Message must be at most 5000 characters'),
 })

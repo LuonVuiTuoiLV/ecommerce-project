@@ -1,30 +1,34 @@
-import { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 
 import { auth } from '@/auth'
 import DeleteDialog from '@/components/shared/delete-dialog'
 import Pagination from '@/components/shared/pagination'
+import ProductPrice from '@/components/shared/product/product-price'
 import { Button } from '@/components/ui/button'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table'
 import { deleteOrder, getAllOrders } from '@/lib/actions/order.actions'
 import { formatDateTime, formatId } from '@/lib/utils'
 import { IOrderList } from '@/types'
-import ProductPrice from '@/components/shared/product/product-price'
 
-export const metadata: Metadata = {
-  title: 'Admin Orders',
+export async function generateMetadata() {
+  const t = await getTranslations('Admin')
+  return {
+    title: t('Orders'),
+  }
 }
 export default async function OrdersPage(props: {
   searchParams: Promise<{ page: string }>
 }) {
   const searchParams = await props.searchParams
+  const t = await getTranslations('Admin')
 
   const { page = '1' } = searchParams
 
@@ -37,18 +41,18 @@ export default async function OrdersPage(props: {
   })
   return (
     <div className='space-y-2'>
-      <h1 className='h1-bold'>Orders</h1>
+      <h1 className='h1-bold'>{t('Orders')}</h1>
       <div className='overflow-x-auto'>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Id</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Buyer</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Paid</TableHead>
-              <TableHead>Delivered</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>{t('Id')}</TableHead>
+              <TableHead>{t('Date')}</TableHead>
+              <TableHead>{t('Buyer')}</TableHead>
+              <TableHead>{t('Total')}</TableHead>
+              <TableHead>{t('Paid')}</TableHead>
+              <TableHead>{t('Delivered')}</TableHead>
+              <TableHead>{t('Actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -59,7 +63,7 @@ export default async function OrdersPage(props: {
                   {formatDateTime(order.createdAt!).dateTime}
                 </TableCell>
                 <TableCell>
-                  {order.user ? order.user.name : 'Deleted User'}
+                  {order.user ? order.user.name : t('Deleted User')}
                 </TableCell>
                 <TableCell>
                   {' '}
@@ -68,16 +72,16 @@ export default async function OrdersPage(props: {
                 <TableCell>
                   {order.isPaid && order.paidAt
                     ? formatDateTime(order.paidAt).dateTime
-                    : 'No'}
+                    : t('No')}
                 </TableCell>
                 <TableCell>
                   {order.isDelivered && order.deliveredAt
                     ? formatDateTime(order.deliveredAt).dateTime
-                    : 'No'}
+                    : t('No')}
                 </TableCell>
                 <TableCell className='flex gap-1'>
                   <Button asChild variant='outline' size='sm'>
-                    <Link href={`/admin/orders/${order._id}`}>Details</Link>
+                    <Link href={`/admin/orders/${order._id}`}>{t('Details')}</Link>
                   </Button>
                   <DeleteDialog id={order._id} action={deleteOrder} />
                 </TableCell>

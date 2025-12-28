@@ -1,23 +1,24 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import { ISettingInput } from '@/types'
 import { TrashIcon } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
+import { useEffect } from 'react'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
 
 export default function LanguageForm({
@@ -27,6 +28,7 @@ export default function LanguageForm({
   form: UseFormReturn<ISettingInput>
   id: string
 }) {
+  const t = useTranslations('AdminForm')
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'availableLanguages',
@@ -52,7 +54,7 @@ export default function LanguageForm({
   return (
     <Card id={id}>
       <CardHeader>
-        <CardTitle>Languages</CardTitle>
+        <CardTitle>{t('Languages')}</CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>
         <div className='space-y-4'>
@@ -63,9 +65,9 @@ export default function LanguageForm({
                 name={`availableLanguages.${index}.name`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Name</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Name')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='Name' />
+                      <Input {...field} placeholder={t('Name')} />
                     </FormControl>
                     <FormMessage>
                       {errors.availableLanguages?.[index]?.name?.message}
@@ -79,9 +81,9 @@ export default function LanguageForm({
                 name={`availableLanguages.${index}.code`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Code</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Code')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='Code' />
+                      <Input {...field} placeholder={t('Code')} />
                     </FormControl>
                     <FormMessage>
                       {errors.availableLanguages?.[index]?.code?.message}
@@ -90,7 +92,7 @@ export default function LanguageForm({
                 )}
               />
               <div>
-                {index == 0 && <div>Action</div>}
+                {index == 0 && <FormLabel className='whitespace-nowrap'>{t('Action')}</FormLabel>}
                 <Button
                   type='button'
                   disabled={fields.length === 1}
@@ -111,7 +113,7 @@ export default function LanguageForm({
             variant={'outline'}
             onClick={() => append({ name: '', code: '' })}
           >
-            Add Language
+            {t('Add Language')}
           </Button>
         </div>
 
@@ -120,14 +122,14 @@ export default function LanguageForm({
           name='defaultLanguage'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Default Language</FormLabel>
+              <FormLabel>{t('Default Language')}</FormLabel>
               <FormControl>
                 <Select
                   value={field.value || ''}
                   onValueChange={(value) => field.onChange(value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder='Select a language' />
+                    <SelectValue placeholder={t('Select a language')} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableLanguages

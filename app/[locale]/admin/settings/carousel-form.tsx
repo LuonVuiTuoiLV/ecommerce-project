@@ -1,17 +1,18 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/hooks/use-toast'
 import { UploadButton } from '@/lib/uploadthing'
 import { ISettingInput } from '@/types'
 import { TrashIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
 
@@ -22,6 +23,7 @@ export default function CarouselForm({
   form: UseFormReturn<ISettingInput>
   id: string
 }) {
+  const t = useTranslations('AdminForm')
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'carousels',
@@ -33,7 +35,7 @@ export default function CarouselForm({
   return (
     <Card id={id}>
       <CardHeader>
-        <CardTitle>Carousels</CardTitle>
+        <CardTitle>{t('Carousels')}</CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>
         <div className='space-y-4'>
@@ -44,9 +46,9 @@ export default function CarouselForm({
                 name={`carousels.${index}.title`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Title</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Title')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='Title' />
+                      <Input {...field} placeholder={t('Title')} />
                     </FormControl>
                     <FormMessage>
                       {errors.carousels?.[index]?.title?.message}
@@ -59,9 +61,9 @@ export default function CarouselForm({
                 name={`carousels.${index}.url`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Url</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Url')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='Url' />
+                      <Input {...field} placeholder={t('Url')} />
                     </FormControl>
                     <FormMessage>
                       {errors.carousels?.[index]?.url?.message}
@@ -74,9 +76,9 @@ export default function CarouselForm({
                 name={`carousels.${index}.buttonCaption`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Caption</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Caption')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='buttonCaption' />
+                      <Input {...field} placeholder={t('Caption')} />
                     </FormControl>
                     <FormMessage>
                       {errors.carousels?.[index]?.buttonCaption?.message}
@@ -90,10 +92,10 @@ export default function CarouselForm({
                   name={`carousels.${index}.image`}
                   render={({ field }) => (
                     <FormItem>
-                      {index == 0 && <FormLabel>Image</FormLabel>}
+                      {index == 0 && <FormLabel>{t('Image')}</FormLabel>}
 
                       <FormControl>
-                        <Input placeholder='Enter image url' {...field} />
+                        <Input placeholder={t('Enter image url')} {...field} />
                       </FormControl>
 
                       <FormMessage />
@@ -126,7 +128,7 @@ export default function CarouselForm({
                 )}
               </div>
               <div>
-                {index == 0 && <div>Action</div>}
+                {index == 0 && <FormLabel className='whitespace-nowrap'>{t('Action')}</FormLabel>}
                 <Button
                   type='button'
                   disabled={fields.length === 1}
@@ -149,7 +151,7 @@ export default function CarouselForm({
               append({ url: '', title: '', image: '', buttonCaption: '' })
             }
           >
-            Add Carousel
+            {t('Add Carousel')}
           </Button>
         </div>
       </CardContent>

@@ -1,5 +1,5 @@
-import { Document, Model, model, models, Schema } from 'mongoose'
 import { IProductInput } from '@/types'
+import { Document, Model, model, models, Schema } from 'mongoose'
 
 export interface IProduct extends Document, IProductInput {
   _id: string
@@ -90,6 +90,22 @@ const productSchema = new Schema<IProduct>(
     timestamps: true,
   }
 )
+
+// Database indexes for query optimization
+productSchema.index({ slug: 1 })
+productSchema.index({ category: 1 })
+productSchema.index({ isPublished: 1 })
+productSchema.index({ tags: 1 })
+productSchema.index({ price: 1 })
+productSchema.index({ avgRating: -1 })
+productSchema.index({ numSales: -1 })
+productSchema.index({ createdAt: -1 })
+// Compound indexes for common queries
+productSchema.index({ isPublished: 1, category: 1 })
+productSchema.index({ isPublished: 1, tags: 1 })
+productSchema.index({ isPublished: 1, price: 1 })
+// Text index for search
+productSchema.index({ name: 'text', description: 'text' })
 
 const Product =
   (models.Product as Model<IProduct>) ||

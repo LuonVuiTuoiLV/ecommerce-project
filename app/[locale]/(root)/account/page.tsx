@@ -1,18 +1,21 @@
 import BrowsingHistoryList from '@/components/shared/browsing-history-list'
 import { Card, CardContent } from '@/components/ui/card'
-import { Home, PackageCheckIcon, User } from 'lucide-react'
-import { Metadata } from 'next'
+import { Heart, Home, PackageCheckIcon, User } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
-import React from 'react'
 
-const PAGE_TITLE = 'Your Account'
-export const metadata: Metadata = {
-  title: PAGE_TITLE,
+export async function generateMetadata() {
+  const t = await getTranslations('Account')
+  return {
+    title: t('Your Account'),
+  }
 }
-export default function AccountPage() {
+export default async function AccountPage() {
+  const t = await getTranslations('Account')
+  const tWishlist = await getTranslations('Wishlist')
   return (
     <div>
-      <h1 className='h1-bold py-4'>{PAGE_TITLE}</h1>
+      <h1 className='h1-bold py-4'>{t('Your Account')}</h1>
       <div className='grid md:grid-cols-3 gap-4 items-stretch'>
         <Card>
           <Link href='/account/orders'>
@@ -21,9 +24,25 @@ export default function AccountPage() {
                 <PackageCheckIcon className='w-12 h-12' />
               </div>
               <div>
-                <h2 className='text-xl font-bold'>Orders</h2>
+                <h2 className='text-xl font-bold'>{t('Orders')}</h2>
                 <p className='text-muted-foreground'>
-                  Track, return, cancel an order, download invoice or buy again
+                  {t('Track return cancel')}
+                </p>
+              </div>
+            </CardContent>
+          </Link>
+        </Card>
+
+        <Card>
+          <Link href='/wishlist'>
+            <CardContent className='flex items-start gap-4 p-6'>
+              <div>
+                <Heart className='w-12 h-12' />
+              </div>
+              <div>
+                <h2 className='text-xl font-bold'>{tWishlist('My Wishlist')}</h2>
+                <p className='text-muted-foreground'>
+                  {tWishlist('Start adding products')}
                 </p>
               </div>
             </CardContent>
@@ -37,9 +56,9 @@ export default function AccountPage() {
                 <User className='w-12 h-12' />
               </div>
               <div>
-                <h2 className='text-xl font-bold'>Login & security</h2>
+                <h2 className='text-xl font-bold'>{t('Login & security')}</h2>
                 <p className='text-muted-foreground'>
-                  Manage password, email and mobile number
+                  {t('Manage password email')}
                 </p>
               </div>
             </CardContent>
@@ -53,9 +72,9 @@ export default function AccountPage() {
                 <Home className='w-12 h-12' />
               </div>
               <div>
-                <h2 className='text-xl font-bold'>Addresses</h2>
+                <h2 className='text-xl font-bold'>{t('Addresses')}</h2>
                 <p className='text-muted-foreground'>
-                  Edit, remove or set default address
+                  {t('Edit remove address')}
                 </p>
               </div>
             </CardContent>
