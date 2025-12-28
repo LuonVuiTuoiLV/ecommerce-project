@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# development only
+/lessons/
+.example-env
+
+# migration scripts (run locally only)
+lib/db/seed.ts
+lib/db/fix-*.ts
+lib/db/update-*.ts
+lib/db/check-db-compatibility.ts
+
+# IDE
+.vscode/
