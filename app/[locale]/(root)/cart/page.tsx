@@ -1,14 +1,15 @@
 'use client'
 import BrowsingHistoryList from '@/components/shared/browsing-history-list'
+import ShippingEstimate from '@/components/shared/cart/shipping-estimate'
 import ProductPrice from '@/components/shared/product/product-price'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import useCartStore from '@/hooks/use-cart-store'
 import useSettingStore from '@/hooks/use-setting-store'
@@ -16,7 +17,6 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React from 'react'
 
 export default function CartPage() {
   const {
@@ -202,6 +202,9 @@ export default function CartPage() {
                   >
                     {t('Cart.Proceed to Checkout')}
                   </Button>
+                  <div className='pt-3 border-t'>
+                    <ShippingEstimate itemsPrice={itemsPrice} />
+                  </div>
                 </CardContent>
               </Card>
             </div>

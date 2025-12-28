@@ -1,20 +1,34 @@
 'use server'
 
-import bcrypt from 'bcryptjs'
 import { auth, signIn, signOut } from '@/auth'
 import { IUserName, IUserSignIn, IUserSignUp } from '@/types'
-import { UserSignUpSchema, UserUpdateSchema } from '../validator'
+import bcrypt from 'bcryptjs'
+import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { z } from 'zod'
 import { connectToDatabase } from '../db'
 import User, { IUser } from '../db/models/user.model'
+import { checkRateLimit, getClientIdentifier, RateLimitPresets } from '../rate-limit'
 import { formatError } from '../utils'
-import { redirect } from 'next/navigation'
-import { revalidatePath } from 'next/cache'
-import { z } from 'zod'
+import { UserSignUpSchema, UserUpdateSchema } from '../validator'
 import { getSetting } from './setting.actions'
 
 // CREATE
 export async function registerUser(userSignUp: IUserSignUp) {
   try {
+    // Rate limiting for registration
+    const headersList = await headers()
+    const clientId = getClientIdentifier(headersList)
+    const rateLimitResult = checkRateLimit(`register:${clientId}`, RateLimitPresets.auth)
+    
+    if (!rateLimitResult.success) {
+      const message = rateLimitResult.blocked 
+        ? `Quá nhiều lần đăng ký. Vui lòng thử lại sau ${Math.ceil(rateLimitResult.resetIn / 60)} phút.`
+        : `Vui lòng thử lại sau ${rateLimitResult.resetIn} giây.`
+      return { success: false, error: message }
+    }
+
     const user = await UserSignUpSchema.parseAsync({
       name: userSignUp.name,
       email: userSignUp.email,
@@ -37,9 +51,20 @@ export async function registerUser(userSignUp: IUserSignUp) {
 
 export async function deleteUser(id: string) {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
+    // Prevent self-deletion
+    if (session.user.id === id) {
+      return { success: false, message: 'Cannot delete your own account' }
+    }
+
     await connectToDatabase()
     const res = await User.findByIdAndDelete(id)
-    if (!res) throw new Error('Use not found')
+    if (!res) throw new Error('User not found')
     revalidatePath('/admin/users')
     return {
       success: true,
@@ -53,6 +78,12 @@ export async function deleteUser(id: string) {
 
 export async function updateUser(user: z.infer<typeof UserUpdateSchema>) {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
     await connectToDatabase()
     const dbUser = await User.findById(user._id)
     if (!dbUser) throw new Error('User not found')
@@ -89,6 +120,18 @@ export async function updateUserName(user: IUserName) {
 }
 
 export async function signInWithCredentials(user: IUserSignIn) {
+  // Rate limiting for sign in
+  const headersList = await headers()
+  const clientId = getClientIdentifier(headersList)
+  const rateLimitResult = checkRateLimit(`signin:${clientId}`, RateLimitPresets.auth)
+  
+  if (!rateLimitResult.success) {
+    const message = rateLimitResult.blocked 
+      ? `Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau ${Math.ceil(rateLimitResult.resetIn / 60)} phút.`
+      : `Vui lòng thử lại sau ${rateLimitResult.resetIn} giây.`
+    throw new Error(message)
+  }
+
   return await signIn('credentials', { ...user, redirect: false })
 }
 export const SignInWithGoogle = async () => {

@@ -2,18 +2,19 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
@@ -22,6 +23,7 @@ import { UserNameSchema } from '@/lib/validator'
 
 export const ProfileForm = () => {
   const router = useRouter()
+  const t = useTranslations('Account')
   const { data: session, update } = useSession()
   const form = useForm<z.infer<typeof UserNameSchema>>({
     resolver: zodResolver(UserNameSchema),
@@ -65,10 +67,10 @@ export const ProfileForm = () => {
             name='name'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel className='font-bold'>New name</FormLabel>
+                <FormLabel className='font-bold'>{t('Name')}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder='Name'
+                    placeholder={t('Name')}
                     {...field}
                     className='input-field'
                   />
@@ -85,7 +87,7 @@ export const ProfileForm = () => {
           disabled={form.formState.isSubmitting}
           className='button col-span-2 w-full'
         >
-          {form.formState.isSubmitting ? 'Submitting...' : 'Save Changes'}
+          {form.formState.isSubmitting ? t('Submitting') : t('Save Changes')}
         </Button>
       </form>
     </Form>

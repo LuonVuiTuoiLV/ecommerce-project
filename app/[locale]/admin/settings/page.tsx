@@ -1,11 +1,13 @@
 import { getNoCachedSetting } from '@/lib/actions/setting.actions'
+import { getTranslations } from 'next-intl/server'
 import SettingForm from './setting-form'
 import SettingNav from './setting-nav'
 
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Setting',
+export async function generateMetadata() {
+  const t = await getTranslations('Admin')
+  return {
+    title: t('Setting'),
+  }
 }
 const SettingPage = async () => {
   return (

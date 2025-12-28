@@ -41,6 +41,16 @@ const reviewSchema = new Schema<IReview>(
   }
 )
 
+// Database indexes for query optimization
+reviewSchema.index({ product: 1 })
+reviewSchema.index({ user: 1 })
+reviewSchema.index({ rating: 1 })
+reviewSchema.index({ createdAt: -1 })
+// Compound indexes
+reviewSchema.index({ product: 1, createdAt: -1 })
+reviewSchema.index({ product: 1, rating: -1 })
+reviewSchema.index({ user: 1, product: 1 }, { unique: true }) // One review per user per product
+
 const Review =
   (models.Review as Model<IReview>) || model<IReview>('Review', reviewSchema)
 

@@ -4,6 +4,7 @@ import { useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 export default function ActionButton({
   caption,
@@ -20,6 +21,7 @@ export default function ActionButton({
 }) {
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
+  const t = useTranslations('Loading')
   return (
     <Button
       type='button'
@@ -37,7 +39,7 @@ export default function ActionButton({
         })
       }
     >
-      {isPending ? 'processing...' : caption}
+      {isPending ? t('Loading') : caption}
     </Button>
   )
 }

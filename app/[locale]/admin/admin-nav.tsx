@@ -20,6 +20,22 @@ const links = [
     href: '/admin/orders',
   },
   {
+    title: 'Reviews',
+    href: '/admin/reviews',
+  },
+  {
+    title: 'Coupons',
+    href: '/admin/coupons',
+  },
+  {
+    title: 'Wishlists',
+    href: '/admin/wishlists',
+  },
+  {
+    title: 'Contacts',
+    href: '/admin/contacts',
+  },
+  {
     title: 'Users',
     href: '/admin/users',
   },

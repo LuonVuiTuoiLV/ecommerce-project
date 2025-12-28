@@ -2,21 +2,24 @@ import { auth } from '@/auth'
 import AddToCart from '@/components/shared/product/add-to-cart'
 import { Card, CardContent } from '@/components/ui/card'
 import {
-  getProductBySlug,
-  getRelatedProductsByCategory,
+    getProductBySlug,
+    getRelatedProductsByCategory,
 } from '@/lib/actions/product.actions'
 
-import ReviewList from './review-list'
-import { generateId, round2 } from '@/lib/utils'
-import SelectVariant from '@/components/shared/product/select-variant'
-import ProductPrice from '@/components/shared/product/product-price'
-import ProductGallery from '@/components/shared/product/product-gallery'
-import AddToBrowsingHistory from '@/components/shared/product/add-to-browsing-history'
-import { Separator } from '@/components/ui/separator'
 import BrowsingHistoryList from '@/components/shared/browsing-history-list'
-import RatingSummary from '@/components/shared/product/rating-summary'
+import AddToBrowsingHistory from '@/components/shared/product/add-to-browsing-history'
+import ProductGallery from '@/components/shared/product/product-gallery'
+import ProductPrice from '@/components/shared/product/product-price'
 import ProductSlider from '@/components/shared/product/product-slider'
+import RatingSummary from '@/components/shared/product/rating-summary'
+import SelectVariant from '@/components/shared/product/select-variant'
+import SocialProof from '@/components/shared/product/social-proof'
+import StockNotificationForm from '@/components/shared/product/stock-notification-form'
+import WishlistButton from '@/components/shared/product/wishlist-button'
+import { Separator } from '@/components/ui/separator'
+import { generateId, round2 } from '@/lib/utils'
 import { getTranslations } from 'next-intl/server'
+import ReviewList from './review-list'
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>
@@ -78,6 +81,11 @@ export default async function ProductDetails(props: {
                 asPopover
                 ratingDistribution={product.ratingDistribution}
               />
+              <SocialProof 
+                productId={product._id} 
+                numSales={product.numSales}
+                variant='compact'
+              />
               <Separator />
               <div className='flex flex-col gap-3 sm:flex-row sm:items-center'>
                 <div className='flex gap-3'>
@@ -129,7 +137,7 @@ export default async function ProductDetails(props: {
                   </div>
                 )}
 
-                {product.countInStock !== 0 && (
+                {product.countInStock !== 0 ? (
                   <div className='flex justify-center items-center'>
                     <AddToCart
                       item={{
@@ -147,7 +155,32 @@ export default async function ProductDetails(props: {
                       }}
                     />
                   </div>
+                ) : (
+                  <StockNotificationForm
+                    productId={product._id}
+                    productName={product.name}
+                    productSlug={product.slug}
+                    variant='card'
+                  />
                 )}
+
+                {/* Wishlist Button */}
+                <div className='flex justify-center'>
+                  <WishlistButton
+                    productId={product._id}
+                    variant='button'
+                    size='md'
+                  />
+                </div>
+
+                {/* Trust Badges */}
+                <Separator className='my-2' />
+                <SocialProof 
+                  productId={product._id}
+                  showViewers={false}
+                  showTrustBadges={true}
+                  variant='full'
+                />
               </CardContent>
             </Card>
           </div>

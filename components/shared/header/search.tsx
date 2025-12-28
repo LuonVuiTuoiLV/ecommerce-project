@@ -1,17 +1,17 @@
 import { SearchIcon } from 'lucide-react'
 
-import { Input } from '@/components/ui/input'
 import { getAllCategories } from '@/lib/actions/product.actions'
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../ui/select'
 import { getSetting } from '@/lib/actions/setting.actions'
 import { getTranslations } from 'next-intl/server'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '../../ui/select'
+import SearchAutocomplete from './search-autocomplete'
 
 export default async function Search() {
   const {
@@ -35,11 +35,8 @@ export default async function Search() {
           ))}
         </SelectContent>
       </Select>
-      <Input
-        className='flex-1 rounded-none dark:border-gray-200 bg-gray-100 text-black text-base h-full'
+      <SearchAutocomplete
         placeholder={t('Header.Search Site', { name })}
-        name='q'
-        type='search'
       />
       <button
         type='submit'

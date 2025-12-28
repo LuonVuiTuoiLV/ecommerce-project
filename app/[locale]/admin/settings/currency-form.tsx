@@ -1,23 +1,24 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import { ISettingInput } from '@/types'
 import { TrashIcon } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
+import { useEffect } from 'react'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
 
 export default function CurrencyForm({
@@ -27,6 +28,7 @@ export default function CurrencyForm({
   form: UseFormReturn<ISettingInput>
   id: string
 }) {
+  const t = useTranslations('AdminForm')
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'availableCurrencies',
@@ -52,7 +54,7 @@ export default function CurrencyForm({
   return (
     <Card id={id}>
       <CardHeader>
-        <CardTitle>Currencies</CardTitle>
+        <CardTitle>{t('Currencies')}</CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>
         <div className='space-y-4'>
@@ -64,9 +66,9 @@ export default function CurrencyForm({
                 render={({ field }) => (
                   <FormItem>
                     {' '}
-                    {index == 0 && <FormLabel>Name</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Name')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='Name' />
+                      <Input {...field} placeholder={t('Name')} />
                     </FormControl>
                     <FormMessage>
                       {errors.availableCurrencies?.[index]?.name?.message}
@@ -80,9 +82,9 @@ export default function CurrencyForm({
                 name={`availableCurrencies.${index}.code`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Code</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Code')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='Code' />
+                      <Input {...field} placeholder={t('Code')} />
                     </FormControl>
                     <FormMessage>
                       {errors.availableCurrencies?.[index]?.code?.message}
@@ -95,9 +97,9 @@ export default function CurrencyForm({
                 name={`availableCurrencies.${index}.symbol`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Symbol</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Symbol')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='Symbol' />
+                      <Input {...field} placeholder={t('Symbol')} />
                     </FormControl>
                     <FormMessage>
                       {errors.availableCurrencies?.[index]?.symbol?.message}
@@ -111,9 +113,9 @@ export default function CurrencyForm({
                 name={`availableCurrencies.${index}.convertRate`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Convert Rate</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Convert Rate')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='Convert Rate' />
+                      <Input {...field} placeholder={t('Convert Rate')} />
                     </FormControl>
                     <FormMessage>
                       {
@@ -125,7 +127,7 @@ export default function CurrencyForm({
                 )}
               />
               <div>
-                {index == 0 && <div>Action</div>}
+                {index == 0 && <FormLabel className='whitespace-nowrap'>{t('Action')}</FormLabel>}
                 <Button
                   type='button'
                   disabled={fields.length === 1}
@@ -148,7 +150,7 @@ export default function CurrencyForm({
               append({ name: '', code: '', symbol: '', convertRate: 1 })
             }
           >
-            Add Currency
+            {t('Add Currency')}
           </Button>
         </div>
 
@@ -157,14 +159,14 @@ export default function CurrencyForm({
           name='defaultCurrency'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Default Currency</FormLabel>
+              <FormLabel>{t('Default Currency')}</FormLabel>
               <FormControl>
                 <Select
                   value={field.value || ''}
                   onValueChange={(value) => field.onChange(value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder='Select a currency' />
+                    <SelectValue placeholder={t('Select a currency')} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableCurrencies

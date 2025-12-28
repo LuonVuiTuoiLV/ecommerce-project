@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
 import useSettingStore from '@/hooks/use-setting-store'
 import { ClientSetting } from '@/types'
+import React, { useEffect, useState } from 'react'
 
 export default function AppInitializer({
   setting,
@@ -16,7 +16,10 @@ export default function AppInitializer({
   }, [setting])
   if (!rendered) {
     useSettingStore.setState({
-      setting,
+      setting: {
+        ...setting,
+        currency: setting.currency || setting.defaultCurrency,
+      },
     })
   }
 

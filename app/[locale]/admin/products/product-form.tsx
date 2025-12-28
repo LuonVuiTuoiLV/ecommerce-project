@@ -1,19 +1,16 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -21,10 +18,14 @@ import { useToast } from '@/hooks/use-toast'
 import { createProduct, updateProduct } from '@/lib/actions/product.actions'
 import { IProduct } from '@/lib/db/models/product.model'
 import { UploadButton } from '@/lib/uploadthing'
-import { ProductInputSchema, ProductUpdateSchema } from '@/lib/validator'
-import { Checkbox } from '@/components/ui/checkbox'
 import { toSlug } from '@/lib/utils'
+import { ProductInputSchema, ProductUpdateSchema } from '@/lib/validator'
 import { IProductInput } from '@/types'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
 
 const productDefaultValues: IProductInput =
   process.env.NODE_ENV === 'development'
@@ -78,6 +79,7 @@ const ProductForm = ({
   product?: IProduct
   productId?: string
 }) => {
+  const t = useTranslations('AdminForm')
   const router = useRouter()
 
   const form = useForm<IProductInput>({
@@ -136,9 +138,9 @@ const ProductForm = ({
             name='name'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>{t('Name')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter product name' {...field} />
+                  <Input placeholder={t('Enter product name')} {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -151,12 +153,12 @@ const ProductForm = ({
             name='slug'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Slug</FormLabel>
+                <FormLabel>{t('Slug')}</FormLabel>
 
                 <FormControl>
                   <div className='relative'>
                     <Input
-                      placeholder='Enter product slug'
+                      placeholder={t('Enter product slug')}
                       className='pl-8'
                       {...field}
                     />
@@ -167,7 +169,7 @@ const ProductForm = ({
                       }}
                       className='absolute right-2 top-2.5'
                     >
-                      Generate
+                      {t('Generate')}
                     </button>
                   </div>
                 </FormControl>
@@ -183,9 +185,9 @@ const ProductForm = ({
             name='category'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>{t('Category')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter category' {...field} />
+                  <Input placeholder={t('Enter category')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -197,9 +199,9 @@ const ProductForm = ({
             name='brand'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Brand</FormLabel>
+                <FormLabel>{t('Brand')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter product brand' {...field} />
+                  <Input placeholder={t('Enter product brand')} {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -213,9 +215,9 @@ const ProductForm = ({
             name='listPrice'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>List Price</FormLabel>
+                <FormLabel>{t('List Price')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter product list price' {...field} />
+                  <Input placeholder={t('Enter product list price')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -226,9 +228,9 @@ const ProductForm = ({
             name='price'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Net Price</FormLabel>
+                <FormLabel>{t('Net Price')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter product price' {...field} />
+                  <Input placeholder={t('Enter product price')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -239,11 +241,11 @@ const ProductForm = ({
             name='countInStock'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Count In Stock</FormLabel>
+                <FormLabel>{t('Count In Stock')}</FormLabel>
                 <FormControl>
                   <Input
                     type='number'
-                    placeholder='Enter product count in stock'
+                    placeholder={t('Enter product count in stock')}
                     {...field}
                   />
                 </FormControl>
@@ -259,7 +261,7 @@ const ProductForm = ({
             name='images'
             render={() => (
               <FormItem className='w-full'>
-                <FormLabel>Images</FormLabel>
+                <FormLabel>{t('Images')}</FormLabel>
                 <Card>
                   <CardContent className='space-y-2 mt-2 min-h-48'>
                     <div className='flex justify-start items-center space-x-2'>
@@ -303,17 +305,16 @@ const ProductForm = ({
             name='description'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>{t('Description')}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder='Tell us a little bit about yourself'
+                    placeholder={t('Enter product description')}
                     className='resize-none'
                     {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  You can <span>@mention</span> other users and organizations to
-                  link to them.
+                  {t('Description hint')}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -332,7 +333,7 @@ const ProductForm = ({
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <FormLabel>Is Published?</FormLabel>
+                <FormLabel>{t('Is Published')}</FormLabel>
               </FormItem>
             )}
           />
@@ -344,7 +345,7 @@ const ProductForm = ({
             disabled={form.formState.isSubmitting}
             className='button col-span-2 w-full'
           >
-            {form.formState.isSubmitting ? 'Submitting...' : `${type} Product `}
+            {form.formState.isSubmitting ? t('Submitting') : `${type === 'Create' ? t('Create Product') : t('Update Product')} `}
           </Button>
         </div>
       </form>

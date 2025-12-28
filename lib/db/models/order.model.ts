@@ -49,6 +49,9 @@ const orderSchema = new Schema<IOrder>(
     shippingPrice: { type: Number, required: true },
     taxPrice: { type: Number, required: true },
     totalPrice: { type: Number, required: true },
+    // Coupon fields
+    couponCode: { type: String },
+    discountAmount: { type: Number, default: 0 },
     isPaid: { type: Boolean, required: true, default: false },
     paidAt: { type: Date },
     isDelivered: { type: Boolean, required: true, default: false },
@@ -59,6 +62,18 @@ const orderSchema = new Schema<IOrder>(
     timestamps: true,
   }
 )
+
+// Database indexes for query optimization
+orderSchema.index({ user: 1 })
+orderSchema.index({ createdAt: -1 })
+orderSchema.index({ isPaid: 1 })
+orderSchema.index({ isDelivered: 1 })
+orderSchema.index({ paymentMethod: 1 })
+orderSchema.index({ couponCode: 1 }) // For coupon usage tracking
+// Compound indexes for common queries
+orderSchema.index({ user: 1, createdAt: -1 })
+orderSchema.index({ isPaid: 1, isDelivered: 1 })
+orderSchema.index({ createdAt: -1, isPaid: 1 })
 
 const Order =
   (models.Order as Model<IOrder>) || model<IOrder>('Order', orderSchema)

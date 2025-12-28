@@ -21,6 +21,11 @@ const userSchema = new Schema<IUser>(
   }
 )
 
+// Database indexes for query optimization
+userSchema.index({ email: 1 })
+userSchema.index({ role: 1 })
+userSchema.index({ createdAt: -1 })
+
 const User = (models.User as Model<IUser>) || model<IUser>('User', userSchema)
 
 export default User

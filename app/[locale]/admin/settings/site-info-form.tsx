@@ -2,11 +2,11 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -14,7 +14,7 @@ import { toast } from '@/hooks/use-toast'
 import { UploadButton } from '@/lib/uploadthing'
 import { ISettingInput } from '@/types'
 import { TrashIcon } from 'lucide-react'
-import React from 'react'
+import { useTranslations } from 'next-intl'
 import { UseFormReturn } from 'react-hook-form'
 
 export default function SiteInfoForm({
@@ -24,13 +24,14 @@ export default function SiteInfoForm({
   form: UseFormReturn<ISettingInput>
   id: string
 }) {
+  const t = useTranslations('AdminForm')
   const { watch, control } = form
 
   const siteLogo = watch('site.logo')
   return (
     <Card id={id}>
       <CardHeader>
-        <CardTitle>Site Info</CardTitle>
+        <CardTitle>{t('Site Info')}</CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>
         <div className='flex flex-col gap-5 md:flex-row'>
@@ -39,9 +40,9 @@ export default function SiteInfoForm({
             name='site.name'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>{t('Name')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter site name' {...field} />
+                  <Input placeholder={t('Enter site name')} {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -54,9 +55,9 @@ export default function SiteInfoForm({
             name='site.url'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Url</FormLabel>
+                <FormLabel>{t('Url')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter url' {...field} />
+                  <Input placeholder={t('Enter url')} {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -71,9 +72,9 @@ export default function SiteInfoForm({
               name='site.logo'
               render={({ field }) => (
                 <FormItem className='w-full'>
-                  <FormLabel>Logo</FormLabel>
+                  <FormLabel>{t('Logo')}</FormLabel>
                   <FormControl>
-                    <Input placeholder='Enter image url' {...field} />
+                    <Input placeholder={t('Enter image url')} {...field} />
                   </FormControl>
 
                   <FormMessage />
@@ -114,10 +115,10 @@ export default function SiteInfoForm({
             name='site.description'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>{t('Description')}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder='Enter description'
+                    placeholder={t('Enter description')}
                     className='h-40'
                     {...field}
                   />
@@ -134,9 +135,9 @@ export default function SiteInfoForm({
             name='site.slogan'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Slogan</FormLabel>
+                <FormLabel>{t('Slogan')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter slogan name' {...field} />
+                  <Input placeholder={t('Enter slogan')} {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -148,9 +149,9 @@ export default function SiteInfoForm({
             name='site.keywords'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Keywords</FormLabel>
+                <FormLabel>{t('Keywords')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter keywords' {...field} />
+                  <Input placeholder={t('Enter keywords')} {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -164,9 +165,9 @@ export default function SiteInfoForm({
             name='site.phone'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Phone</FormLabel>
+                <FormLabel>{t('Phone')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter phone number' {...field} />
+                  <Input placeholder={t('Enter phone number')} {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -178,9 +179,9 @@ export default function SiteInfoForm({
             name='site.email'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{t('Email')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter email address' {...field} />
+                  <Input placeholder={t('Enter email address')} {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -194,9 +195,9 @@ export default function SiteInfoForm({
             name='site.address'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Address</FormLabel>
+                <FormLabel>{t('Address')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter address' {...field} />
+                  <Input placeholder={t('Enter address')} {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -208,9 +209,9 @@ export default function SiteInfoForm({
             name='site.copyright'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Copyright</FormLabel>
+                <FormLabel>{t('Copyright')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter copyright' {...field} />
+                  <Input placeholder={t('Enter copyright')} {...field} />
                 </FormControl>
 
                 <FormMessage />

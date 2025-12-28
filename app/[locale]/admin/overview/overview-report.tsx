@@ -2,34 +2,34 @@
 import { BadgeDollarSign, Barcode, CreditCard, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import Link from 'next/link'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table'
 import { calculatePastDate, formatDateTime, formatNumber } from '@/lib/utils'
+import Link from 'next/link'
 
 import SalesCategoryPieChart from './sales-category-pie-chart'
 
-import React, { useEffect, useState, useTransition } from 'react'
-import { DateRange } from 'react-day-picker'
-import { getOrderSummary } from '@/lib/actions/order.actions'
-import SalesAreaChart from './sales-area-chart'
-import { CalendarDateRangePicker } from './date-range-picker'
-import { IOrderList } from '@/types'
 import ProductPrice from '@/components/shared/product/product-price'
 import { Skeleton } from '@/components/ui/skeleton'
+import { getOrderSummary } from '@/lib/actions/order.actions'
+import { IOrderList } from '@/types'
+import { useEffect, useState, useTransition } from 'react'
+import { DateRange } from 'react-day-picker'
+import { CalendarDateRangePicker } from './date-range-picker'
+import SalesAreaChart from './sales-area-chart'
 import TableChart from './table-chart'
 
 export default function OverviewReport() {
@@ -176,7 +176,7 @@ export default function OverviewReport() {
         <div className='grid gap-4 md:grid-cols-2'>
           <Card>
             <CardHeader>
-              <CardTitle>{t('How much you’re earning')}</CardTitle>
+              <CardTitle>{t('Your Earnings')}</CardTitle>
               <CardDescription>
                 {t('Estimated')} · {t('Last 6 months')}
               </CardDescription>
@@ -189,8 +189,7 @@ export default function OverviewReport() {
             <CardHeader>
               <CardTitle>{t('Product Performance')}</CardTitle>
               <CardDescription>
-                {formatDateTime(date!.from!).dateOnly} to{' '}
-                {formatDateTime(date!.to!).dateOnly}
+                {formatDateTime(date!.from!).dateOnly} - {formatDateTime(date!.to!).dateOnly}
               </CardDescription>
             </CardHeader>
             <CardContent>

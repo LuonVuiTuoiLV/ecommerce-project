@@ -1,15 +1,16 @@
 'use client'
+import { useTranslations } from 'next-intl'
 import { useState, useTransition } from 'react'
 
 import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
@@ -23,6 +24,7 @@ export default function DeleteDialog({
   action: (id: string) => Promise<{ success: boolean; message: string }>
   callbackAction?: () => void
 }) {
+  const t = useTranslations('Admin')
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
@@ -30,18 +32,18 @@ export default function DeleteDialog({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button size='sm' variant='outline'>
-          Delete
+          {t('Delete')}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>{t('Are you absolutely sure')}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone.
+            {t('This action cannot be undone')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
 
           <Button
             variant='destructive'
@@ -65,7 +67,7 @@ export default function DeleteDialog({
               })
             }
           >
-            {isPending ? 'Deleting...' : 'Delete'}
+            {isPending ? t('Deleting') : t('Delete')}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

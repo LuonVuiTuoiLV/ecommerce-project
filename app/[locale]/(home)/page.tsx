@@ -5,29 +5,41 @@ import ProductSlider from '@/components/shared/product/product-slider'
 import { Card, CardContent } from '@/components/ui/card'
 
 import {
-  getProductsForCard,
-  getProductsByTag,
-  getAllCategories,
+    getAllCategories,
+    getProductsByTag,
+    getProductsForCard,
 } from '@/lib/actions/product.actions'
 import { getSetting } from '@/lib/actions/setting.actions'
 import { toSlug } from '@/lib/utils'
 import { getTranslations } from 'next-intl/server'
 
+// Mapping Vietnamese category names to English image filenames
+const categoryImageMap: Record<string, string> = {
+  'Quần Jean': 'jeans',
+  'Giày dép': 'shoes',
+  'Áo thun': 't-shirts',
+  'Đồng hồ đeo tay': 'wrist-watches',
+  'Jeans': 'jeans',
+  'Shoes': 'shoes',
+  'T-Shirts': 't-shirts',
+  'Wrist Watches': 'wrist-watches',
+}
+
 export default async function HomePage() {
   const t = await getTranslations('Home')
   const { carousels } = await getSetting()
-  const todaysDeals = await getProductsByTag({ tag: 'todays-deal' })
-  const bestSellingProducts = await getProductsByTag({ tag: 'best-seller' })
+  const todaysDeals = await getProductsByTag({ tag: 'Ưu đãi hôm nay' })
+  const bestSellingProducts = await getProductsByTag({ tag: 'Bán chạy' })
 
   const categories = (await getAllCategories()).slice(0, 4)
   const newArrivals = await getProductsForCard({
-    tag: 'new-arrival',
+    tag: 'Hàng mới',
   })
   const featureds = await getProductsForCard({
-    tag: 'featured',
+    tag: 'Nổi bật',
   })
   const bestSellers = await getProductsForCard({
-    tag: 'best-seller',
+    tag: 'Bán chạy',
   })
   const cards = [
     {
@@ -38,7 +50,7 @@ export default async function HomePage() {
       },
       items: categories.map((category) => ({
         name: category,
-        image: `/images/${toSlug(category)}.jpg`,
+        image: `/images/${categoryImageMap[category] || toSlug(category)}.jpg`,
         href: `/search?category=${category}`,
       })),
     },
@@ -47,7 +59,7 @@ export default async function HomePage() {
       items: newArrivals,
       link: {
         text: t('View All'),
-        href: '/search?tag=new-arrival',
+        href: '/search?tag=Hàng mới',
       },
     },
     {
@@ -55,7 +67,7 @@ export default async function HomePage() {
       items: bestSellers,
       link: {
         text: t('View All'),
-        href: '/search?tag=new-arrival',
+        href: '/search?tag=Bán chạy',
       },
     },
     {
@@ -63,7 +75,7 @@ export default async function HomePage() {
       items: featureds,
       link: {
         text: t('Shop Now'),
-        href: '/search?tag=new-arrival',
+        href: '/search?tag=Nổi bật',
       },
     },
   ]

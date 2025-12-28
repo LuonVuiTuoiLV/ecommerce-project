@@ -82,6 +82,12 @@ const settingSchema = new Schema<ISetting>(
       {
         name: { type: String, required: true },
         commission: { type: Number, required: true, default: 0 },
+        // Bank Transfer details
+        bankName: { type: String },
+        bankAccountNumber: { type: String },
+        bankAccountName: { type: String },
+        // Additional info
+        description: { type: String },
       },
     ],
     defaultPaymentMethod: { type: String, required: true },

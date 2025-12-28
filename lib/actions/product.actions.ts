@@ -1,20 +1,37 @@
 'use server'
 
+import { auth } from '@/auth'
+import { sendBackInStockNotification } from '@/emails'
 import { connectToDatabase } from '@/lib/db'
 import Product, { IProduct } from '@/lib/db/models/product.model'
+import { IProductInput } from '@/types'
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
+import StockNotification from '../db/models/stock-notification.model'
 import { formatError } from '../utils'
 import { ProductInputSchema, ProductUpdateSchema } from '../validator'
-import { IProductInput } from '@/types'
-import { z } from 'zod'
 import { getSetting } from './setting.actions'
+
+// Cache for categories (resets on server restart)
+const globalForCategories = global as unknown as {
+  cachedCategories: string[] | null
+  categoriesCacheTime: number | null
+}
+const CATEGORIES_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
 // CREATE
 export async function createProduct(data: IProductInput) {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
     const product = ProductInputSchema.parse(data)
     await connectToDatabase()
     await Product.create(product)
+    invalidateCategoriesCache() // Invalidate cache when new product created
     revalidatePath('/admin/products')
     return {
       success: true,
@@ -28,9 +45,29 @@ export async function createProduct(data: IProductInput) {
 // UPDATE
 export async function updateProduct(data: z.infer<typeof ProductUpdateSchema>) {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
     const product = ProductUpdateSchema.parse(data)
     await connectToDatabase()
+    
+    // Get old product to check stock change
+    const oldProduct = await Product.findById(product._id)
+    const wasOutOfStock = oldProduct && oldProduct.countInStock === 0
+    const isNowInStock = product.countInStock > 0
+    
     await Product.findByIdAndUpdate(product._id, product)
+    invalidateCategoriesCache() // Invalidate cache when product updated
+    
+    // If product was out of stock and now has stock, notify subscribers
+    if (wasOutOfStock && isNowInStock) {
+      // Run notification in background, don't block the response
+      notifyStockSubscribers(product._id, oldProduct).catch(console.error)
+    }
+    
     revalidatePath('/admin/products')
     return {
       success: true,
@@ -40,12 +77,87 @@ export async function updateProduct(data: z.infer<typeof ProductUpdateSchema>) {
     return { success: false, message: formatError(error) }
   }
 }
+
+// Notify subscribers when product is back in stock
+async function notifyStockSubscribers(productId: string, product: IProduct) {
+  try {
+    // Get pending notifications for this product
+    const notifications = await StockNotification.find({
+      product: productId,
+      isNotified: false,
+    })
+
+    if (notifications.length === 0) return
+
+    // Get site settings for email
+    const { site } = await getSetting()
+
+    // Track successful and failed notifications
+    const results: { email: string; success: boolean; error?: string }[] = []
+
+    // Send email to each subscriber with retry logic
+    for (const notification of notifications) {
+      let success = false
+      let lastError = ''
+      
+      // Retry up to 3 times
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          await sendBackInStockNotification({
+            email: notification.email,
+            productName: notification.productName,
+            productSlug: notification.productSlug,
+            productImage: product.images?.[0],
+            siteUrl: site.url,
+            siteName: site.name,
+          })
+          success = true
+          break
+        } catch (emailError) {
+          lastError = emailError instanceof Error ? emailError.message : 'Unknown error'
+          console.error(`Attempt ${attempt}/3 failed for ${notification.email}:`, lastError)
+          
+          // Wait before retry (exponential backoff)
+          if (attempt < 3) {
+            await new Promise(resolve => setTimeout(resolve, attempt * 1000))
+          }
+        }
+      }
+      
+      results.push({ email: notification.email, success, error: success ? undefined : lastError })
+      
+      // Only mark as notified if email was sent successfully
+      if (success) {
+        await StockNotification.updateOne(
+          { _id: notification._id },
+          { isNotified: true, notifiedAt: new Date() }
+        )
+      }
+    }
+
+    // Log summary
+    const failCount = results.filter(r => !r.success).length
+    
+    if (failCount > 0) {
+      console.error('Failed notifications:', results.filter(r => !r.success))
+    }
+  } catch (error) {
+    console.error('Error notifying stock subscribers:', error)
+  }
+}
 // DELETE
 export async function deleteProduct(id: string) {
   try {
+    // Admin authorization check
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'Admin') {
+      return { success: false, message: 'Unauthorized' }
+    }
+
     await connectToDatabase()
     const res = await Product.findByIdAndDelete(id)
     if (!res) throw new Error('Product not found')
+    invalidateCategoriesCache() // Invalidate cache when product deleted
     revalidatePath('/admin/products')
     return {
       success: true,
@@ -121,11 +233,33 @@ export async function getAllProductsForAdmin({
 }
 
 export async function getAllCategories() {
+  const now = Date.now()
+  
+  // Check if cache is valid
+  if (
+    globalForCategories.cachedCategories &&
+    globalForCategories.categoriesCacheTime &&
+    now - globalForCategories.categoriesCacheTime < CATEGORIES_CACHE_TTL
+  ) {
+    return globalForCategories.cachedCategories
+  }
+  
   await connectToDatabase()
   const categories = await Product.find({ isPublished: true }).distinct(
     'category'
   )
+  
+  // Update cache
+  globalForCategories.cachedCategories = categories
+  globalForCategories.categoriesCacheTime = now
+  
   return categories
+}
+
+// Invalidate categories cache (call when products are created/updated/deleted)
+function invalidateCategoriesCache() {
+  globalForCategories.cachedCategories = null
+  globalForCategories.categoriesCacheTime = null
 }
 export async function getProductsForCard({
   tag,

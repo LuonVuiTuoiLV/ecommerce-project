@@ -1,17 +1,18 @@
-import { EllipsisVertical } from 'lucide-react'
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
 } from '@/components/ui/sheet'
-import CartButton from './cart-button'
-import UserButton from './user-button'
-import ThemeSwitcher from './theme-switcher'
-import LanguageSwitcher from './language-switcher'
+import { EllipsisVertical } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import CartButton from './cart-button'
+import LanguageSwitcher from './language-switcher'
+import ThemeSwitcher from './theme-switcher'
+import UserButton from './user-button'
+import HeaderWishlistButton from './wishlist-button'
 
 const Menu = ({ forAdmin = false }: { forAdmin?: boolean }) => {
   const t = useTranslations()
@@ -21,7 +22,12 @@ const Menu = ({ forAdmin = false }: { forAdmin?: boolean }) => {
         <LanguageSwitcher />
         <ThemeSwitcher />
         <UserButton />
-        {forAdmin ? null : <CartButton />}
+        {forAdmin ? null : (
+          <>
+            <HeaderWishlistButton />
+            <CartButton />
+          </>
+        )}
       </nav>
       <nav className='md:hidden'>
         <Sheet>
@@ -38,6 +44,7 @@ const Menu = ({ forAdmin = false }: { forAdmin?: boolean }) => {
             <LanguageSwitcher />
             <ThemeSwitcher />
             <UserButton />
+            <HeaderWishlistButton />
             <CartButton />
           </SheetContent>
         </Sheet>

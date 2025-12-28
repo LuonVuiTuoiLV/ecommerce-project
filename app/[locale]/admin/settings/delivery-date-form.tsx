@@ -2,23 +2,24 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import { ISettingInput } from '@/types'
 import { TrashIcon } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
+import { useEffect } from 'react'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
 
 export default function DeliveryDateForm({
@@ -28,6 +29,7 @@ export default function DeliveryDateForm({
   form: UseFormReturn<ISettingInput>
   id: string
 }) {
+  const t = useTranslations('AdminForm')
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'availableDeliveryDates',
@@ -52,7 +54,7 @@ export default function DeliveryDateForm({
   return (
     <Card id={id}>
       <CardHeader>
-        <CardTitle>Delivery Dates</CardTitle>
+        <CardTitle>{t('Delivery Dates')}</CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>
         <div className='space-y-4'>
@@ -63,9 +65,9 @@ export default function DeliveryDateForm({
                 name={`availableDeliveryDates.${index}.name`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Name</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Name')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='Name' />
+                      <Input {...field} placeholder={t('Name')} />
                     </FormControl>
                     <FormMessage>
                       {errors.availableDeliveryDates?.[index]?.name?.message}
@@ -78,9 +80,9 @@ export default function DeliveryDateForm({
                 name={`availableDeliveryDates.${index}.daysToDeliver`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Days</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Days')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='daysToDeliver' />
+                      <Input {...field} placeholder={t('Days')} />
                     </FormControl>
                     <FormMessage>
                       {
@@ -96,9 +98,9 @@ export default function DeliveryDateForm({
                 name={`availableDeliveryDates.${index}.shippingPrice`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Shipping Price</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Shipping Price')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='shippingPrice' />
+                      <Input {...field} placeholder={t('Shipping Price')} />
                     </FormControl>
                     <FormMessage>
                       {
@@ -114,9 +116,9 @@ export default function DeliveryDateForm({
                 name={`availableDeliveryDates.${index}.freeShippingMinPrice`}
                 render={({ field }) => (
                   <FormItem>
-                    {index == 0 && <FormLabel>Free Shipping</FormLabel>}
+                    {index == 0 && <FormLabel>{t('Free Shipping')}</FormLabel>}
                     <FormControl>
-                      <Input {...field} placeholder='freeShippingMinPrice' />
+                      <Input {...field} placeholder={t('Free Shipping')} />
                     </FormControl>
                     <FormMessage>
                       {
@@ -128,7 +130,7 @@ export default function DeliveryDateForm({
                 )}
               />
               <div>
-                {index == 0 && <div className=''>Action</div>}
+                {index == 0 && <FormLabel className='whitespace-nowrap'>{t('Action')}</FormLabel>}
                 <Button
                   type='button'
                   disabled={fields.length === 1}
@@ -140,7 +142,7 @@ export default function DeliveryDateForm({
                 >
                   <TrashIcon className='w-4 h-4' />
                 </Button>
-              </div>{' '}
+              </div>
             </div>
           ))}
 
@@ -156,7 +158,7 @@ export default function DeliveryDateForm({
               })
             }
           >
-            Add DeliveryDate
+            {t('Add Delivery Date')}
           </Button>
         </div>
 
@@ -165,14 +167,14 @@ export default function DeliveryDateForm({
           name='defaultDeliveryDate'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Default DeliveryDate</FormLabel>
+              <FormLabel>{t('Default Delivery Date')}</FormLabel>
               <FormControl>
                 <Select
                   value={field.value || ''}
                   onValueChange={(value) => field.onChange(value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder='Select a delivery date' />
+                    <SelectValue placeholder={t('Select a delivery date')} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableDeliveryDates

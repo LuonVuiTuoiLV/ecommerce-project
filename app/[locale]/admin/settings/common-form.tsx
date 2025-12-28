@@ -1,23 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import { COLORS, THEMES } from '@/lib/constants'
 import { ISettingInput } from '@/types'
-import React from 'react'
+import { useTranslations } from 'next-intl'
 import { UseFormReturn } from 'react-hook-form'
 
 export default function CommonForm({
@@ -27,12 +27,13 @@ export default function CommonForm({
   form: UseFormReturn<ISettingInput>
   id: string
 }) {
+  const t = useTranslations('AdminForm')
   const { control } = form
 
   return (
     <Card id={id}>
       <CardHeader>
-        <CardTitle>Common Settings</CardTitle>
+        <CardTitle>{t('Common Settings')}</CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>
         <div className='flex flex-col gap-5 md:flex-row'>
@@ -41,9 +42,9 @@ export default function CommonForm({
             name='common.pageSize'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Page Size</FormLabel>
+                <FormLabel>{t('Page Size')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter Page Size' {...field} />
+                  <Input placeholder={t('Enter Page Size')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -54,10 +55,10 @@ export default function CommonForm({
             name='common.freeShippingMinPrice'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Free Shipping Minimum Price</FormLabel>
+                <FormLabel>{t('Free Shipping Minimum Price')}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder='Enter Free Shipping Minimum Price'
+                    placeholder={t('Enter Free Shipping Minimum Price')}
                     {...field}
                   />
                 </FormControl>
@@ -72,14 +73,14 @@ export default function CommonForm({
             name='common.defaultColor'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Default Color</FormLabel>
+                <FormLabel>{t('Default Color')}</FormLabel>
                 <FormControl>
                   <Select
                     value={field.value || ''}
                     onValueChange={(value) => field.onChange(value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder='Select a color' />
+                      <SelectValue placeholder={t('Select a color')} />
                     </SelectTrigger>
                     <SelectContent>
                       {COLORS.map((color, index) => (
@@ -99,14 +100,14 @@ export default function CommonForm({
             name='common.defaultTheme'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Default Theme</FormLabel>
+                <FormLabel>{t('Default Theme')}</FormLabel>
                 <FormControl>
                   <Select
                     value={field.value || ''}
                     onValueChange={(value) => field.onChange(value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder='Select a theme' />
+                      <SelectValue placeholder={t('Select a theme')} />
                     </SelectTrigger>
                     <SelectContent>
                       {THEMES.map((theme, index) => (
@@ -134,7 +135,7 @@ export default function CommonForm({
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <FormLabel>Maintenance Mode?</FormLabel>
+                <FormLabel>{t('Maintenance Mode')}</FormLabel>
                 <FormMessage />
               </FormItem>
             )}

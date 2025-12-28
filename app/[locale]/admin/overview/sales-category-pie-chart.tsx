@@ -2,13 +2,14 @@
 'use client'
 
 import useColorStore from '@/hooks/use-color-store'
+import { useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
-import React from 'react'
-import { PieChart, Pie, ResponsiveContainer, Cell } from 'recharts'
+import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 
 export default function SalesCategoryPieChart({ data }: { data: any[] }) {
   const { theme } = useTheme()
   const { cssColors } = useColorStore(theme)
+  const t = useTranslations('Admin')
 
   const RADIAN = Math.PI / 180
   const renderCustomizedLabel = ({
@@ -32,7 +33,7 @@ export default function SalesCategoryPieChart({ data }: { data: any[] }) {
           dominantBaseline='central'
           className='text-xs'
         >
-          {`${data[index]._id} ${data[index].totalSales} sales`}
+          {`${data[index]._id} ${data[index].totalSales} ${t('Sales').toLowerCase()}`}
         </text>
       </>
     )

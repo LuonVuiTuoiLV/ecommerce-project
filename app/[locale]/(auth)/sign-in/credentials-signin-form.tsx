@@ -2,24 +2,25 @@
 import { redirect, useSearchParams } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import Link from 'next/link'
-import useSettingStore from '@/hooks/use-setting-store'
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form'
-import { useForm } from 'react-hook-form'
-import { IUserSignIn } from '@/types'
+import { Input } from '@/components/ui/input'
+import useSettingStore from '@/hooks/use-setting-store'
 import { signInWithCredentials } from '@/lib/actions/user.actions'
+import { IUserSignIn } from '@/types'
+import Link from 'next/link'
+import { useForm } from 'react-hook-form'
 
 import { toast } from '@/hooks/use-toast'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { UserSignInSchema } from '@/lib/validator'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 const signInDefaultValues =
@@ -39,6 +40,7 @@ export default function CredentialsSignInForm() {
   } = useSettingStore()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
+  const t = useTranslations('Auth')
 
   const form = useForm<IUserSignIn>({
     resolver: zodResolver(UserSignInSchema),
@@ -59,8 +61,8 @@ export default function CredentialsSignInForm() {
         throw error
       }
       toast({
-        title: 'Error',
-        description: 'Invalid email or password',
+        title: t('Error'),
+        description: t('Invalid email or password'),
         variant: 'destructive',
       })
     }
@@ -76,9 +78,9 @@ export default function CredentialsSignInForm() {
             name='email'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{t('Email')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter email address' {...field} />
+                  <Input placeholder={t('Email')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -90,11 +92,11 @@ export default function CredentialsSignInForm() {
             name='password'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{t('Password')}</FormLabel>
                 <FormControl>
                   <Input
                     type='password'
-                    placeholder='Enter password'
+                    placeholder={t('Password')}
                     {...field}
                   />
                 </FormControl>
@@ -104,12 +106,12 @@ export default function CredentialsSignInForm() {
           />
 
           <div>
-            <Button type='submit'>Sign In</Button>
+            <Button type='submit'>{t('Sign In')}</Button>
           </div>
           <div className='text-sm'>
-            By signing in, you agree to {site.name}&apos;s{' '}
-            <Link href='/page/conditions-of-use'>Conditions of Use</Link> and{' '}
-            <Link href='/page/privacy-policy'>Privacy Notice.</Link>
+            {t('By signing in')} {site.name}&apos;s{' '}
+            <Link href='/page/conditions-of-use'>{t('Conditions of Use')}</Link> {t('and')}{' '}
+            <Link href='/page/privacy-policy'>{t('Privacy Notice')}</Link>
           </div>
         </div>
       </form>

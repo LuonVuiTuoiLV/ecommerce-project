@@ -1,18 +1,20 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import {
-  CreditCard,
-  Currency,
-  ImageIcon,
-  Info,
-  Languages,
-  Package,
-  SettingsIcon,
+    CreditCard,
+    Currency,
+    ImageIcon,
+    Info,
+    Languages,
+    Package,
+    SettingsIcon,
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { useEffect, useState } from 'react'
 
 const SettingNav = () => {
+  const t = useTranslations('Admin')
   const [active, setActive] = useState('')
 
   useEffect(() => {
@@ -41,33 +43,33 @@ const SettingNav = () => {
 
   return (
     <div>
-      <h1 className='h1-bold'>Setting</h1>
+      <h1 className='h1-bold'>{t('Setting')}</h1>
       <nav className='flex md:flex-col gap-2 md:fixed mt-4 flex-wrap'>
         {[
-          { name: 'Site Info', hash: 'setting-site-info', icon: <Info /> },
+          { name: t('Site Info'), hash: 'setting-site-info', icon: <Info /> },
           {
-            name: 'Common Settings',
+            name: t('Common Settings'),
             hash: 'setting-common',
             icon: <SettingsIcon />,
           },
           {
-            name: 'Carousels',
+            name: t('Carousels'),
             hash: 'setting-carousels',
             icon: <ImageIcon />,
           },
-          { name: 'Languages', hash: 'setting-languages', icon: <Languages /> },
+          { name: t('Languages'), hash: 'setting-languages', icon: <Languages /> },
           {
-            name: 'Currencies',
+            name: t('Currencies'),
             hash: 'setting-currencies',
             icon: <Currency />,
           },
           {
-            name: 'Payment Methods',
+            name: t('Payment Methods'),
             hash: 'setting-payment-methods',
             icon: <CreditCard />,
           },
           {
-            name: 'Delivery Dates',
+            name: t('Delivery Dates'),
             hash: 'setting-delivery-dates',
             icon: <Package />,
           },

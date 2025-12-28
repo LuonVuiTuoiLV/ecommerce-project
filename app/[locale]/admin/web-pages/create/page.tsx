@@ -1,14 +1,18 @@
-import { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import WebPageForm from '../web-page-form'
 
-export const metadata: Metadata = {
-  title: 'Create WebPage',
+export async function generateMetadata() {
+  const t = await getTranslations('Admin')
+  return {
+    title: t('Create WebPage'),
+  }
 }
 
-export default function CreateWebPagePage() {
+export default async function CreateWebPagePage() {
+  const t = await getTranslations('Admin')
   return (
     <>
-      <h1 className='h1-bold'>Create WebPage</h1>
+      <h1 className='h1-bold'>{t('Create WebPage')}</h1>
 
       <div className='my-8'>
         <WebPageForm type='Create' />

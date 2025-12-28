@@ -1,30 +1,33 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
 
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { IProduct } from '@/lib/db/models/product.model'
 
-import Rating from './rating'
 import { formatNumber, generateId, round2 } from '@/lib/utils'
-import ProductPrice from './product-price'
-import ImageHover from './image-hover'
 import AddToCart from './add-to-cart'
+import ImageHover from './image-hover'
+import ProductPrice from './product-price'
+import { QuickViewButton } from './quick-view-modal'
+import Rating from './rating'
+import WishlistButton from './wishlist-button'
 
 const ProductCard = ({
   product,
   hideBorder = false,
   hideDetails = false,
   hideAddToCart = false,
+  hideWishlist = false,
 }: {
   product: IProduct
   hideDetails?: boolean
   hideBorder?: boolean
   hideAddToCart?: boolean
+  hideWishlist?: boolean
 }) => {
   const ProductImage = () => (
     <Link href={`/product/${product.slug}`}>
-      <div className='relative h-52'>
+      <div className='relative h-52 group'>
         {product.images.length > 1 ? (
           <ImageHover
             src={product.images[0]}
@@ -42,6 +45,16 @@ const ProductCard = ({
             />
           </div>
         )}
+        {/* Wishlist Button */}
+        {!hideWishlist && (
+          <div className='absolute top-2 right-2 z-10'>
+            <WishlistButton productId={product._id} size='sm' />
+          </div>
+        )}
+        {/* Quick View Button - appears on hover */}
+        <div className='absolute bottom-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10'>
+          <QuickViewButton product={product} />
+        </div>
       </div>
     </Link>
   )

@@ -1,3 +1,4 @@
+// MongoDB client for NextAuth adapter
 // This approach is taken from https://github.com/vercel/next.js/tree/canary/examples/with-mongodb
 import { MongoClient, ServerApiVersion } from 'mongodb'
 
@@ -32,6 +33,5 @@ if (process.env.NODE_ENV === 'development') {
   client = new MongoClient(uri, options)
 }
 
-// Export a module-scoped MongoClient. By doing this in a
-// separate module, the client can be shared across functions.
+// Export a module-scoped MongoClient for NextAuth MongoDBAdapter
 export default client

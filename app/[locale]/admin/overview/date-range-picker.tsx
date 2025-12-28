@@ -1,18 +1,19 @@
 'use client'
 
-import * as React from 'react'
 import { CalendarIcon } from 'lucide-react'
+import * as React from 'react'
 import { DateRange } from 'react-day-picker'
 
-import { cn, formatDateTime } from '@/lib/utils'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+import { cn, formatDateTime } from '@/lib/utils'
 import { PopoverClose } from '@radix-ui/react-popover'
+import { useTranslations } from 'next-intl'
 
 export function CalendarDateRangePicker({
   defaultDate,
@@ -26,6 +27,7 @@ export function CalendarDateRangePicker({
   const [calendarDate, setCalendarDate] = React.useState<DateRange | undefined>(
     defaultDate
   )
+  const t = useTranslations('Admin')
 
   return (
     <div className={cn('grid gap-2', className)}>
@@ -50,7 +52,7 @@ export function CalendarDateRangePicker({
                 formatDateTime(calendarDate.from).dateOnly
               )
             ) : (
-              <span>Pick a date</span>
+              <span>{t('Pick a date')}</span>
             )}
           </Button>
         </PopoverTrigger>
@@ -68,10 +70,10 @@ export function CalendarDateRangePicker({
           />
           <div className='flex gap-4 p-4 pt-0'>
             <PopoverClose asChild>
-              <Button onClick={() => setDate(calendarDate)}>Apply</Button>
+              <Button onClick={() => setDate(calendarDate)}>{t('Apply')}</Button>
             </PopoverClose>
             <PopoverClose asChild>
-              <Button variant={'outline'}>Cancel</Button>
+              <Button variant={'outline'}>{t('Cancel')}</Button>
             </PopoverClose>
           </div>
         </PopoverContent>

@@ -1,10 +1,14 @@
-import { Metadata } from 'next'
-
-import OverviewReport from './overview-report'
 import { auth } from '@/auth'
-export const metadata: Metadata = {
-  title: 'Admin Dashboard',
+import { getTranslations } from 'next-intl/server'
+import OverviewReport from './overview-report'
+
+export async function generateMetadata() {
+  const t = await getTranslations('Admin')
+  return {
+    title: t('Dashboard'),
+  }
 }
+
 const DashboardPage = async () => {
   const session = await auth()
   if (session?.user.role !== 'Admin')

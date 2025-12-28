@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 
 import { getWebPageById } from '@/lib/actions/web-page.actions'
@@ -12,6 +13,7 @@ type UpdateWebPageProps = {
 
 const UpdateWebPage = async (props: UpdateWebPageProps) => {
   const params = await props.params
+  const t = await getTranslations('Admin')
 
   const { id } = params
 
@@ -20,7 +22,7 @@ const UpdateWebPage = async (props: UpdateWebPageProps) => {
   return (
     <main className='max-w-6xl mx-auto p-4'>
       <div className='flex mb-4'>
-        <Link href='/admin/web-pages'>Web Pages</Link>
+        <Link href='/admin/web-pages'>{t('Web Pages')}</Link>
         <span className='mx-1'>›</span>
         <Link href={`/admin/web-pages/${webPage._id}`}>{webPage._id}</Link>
       </div>
